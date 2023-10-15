@@ -52,7 +52,9 @@ There is a number of apps that can be used to accomplish consecutive stages of p
     2.3 Create projected probe maps: ``cosmogridv1/apps/run_project_shells.py``      
 
 The output files will contain full-sky probe maps, without noise, masks, and systematics.
-The intrinsic alignment and galaxy clustering maps can be 
+The intrinsic alignment map can be added to the convergence map with an appropriate amplitude.
+Galaxy overdensity maps can be multiplied by a bias parameter.
+Downstream processig for applying survey masks, noise, systematics, etc, is not part of this pipeline and left for the user.
 
 
 
