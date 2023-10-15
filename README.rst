@@ -41,7 +41,7 @@ There is a number of apps that can be used to accomplish consecutive stages of p
 
     1.1 Run halocone creation and halo profiling:  ``cosmogridv1/apps/run_baryonification.py profile_halos``     
 
-    1.2 Displace shells using the halocone: ``/cosmogridv1/apps/run_baryonification.py displace_shells``     
+    1.2 Displace shells using the halocone: ``cosmogridv1/apps/run_baryonification.py displace_shells``     
 
 2.  Create projected probe maps      
 
@@ -60,6 +60,7 @@ Features
 --------
 
 * Create website for API documentation 
+* Add description of the config file
 
 Credits
 -------
