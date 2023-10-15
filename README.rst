@@ -2,7 +2,7 @@
 CosmoGridV11
 ============
 
-
+ <!---
 .. image:: https://img.shields.io/pypi/v/cosmogridv11.svg
         :target: https://pypi.python.org/pypi/cosmogridv11
 
@@ -13,7 +13,7 @@ CosmoGridV11
         :target: https://cosmogridv11.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
-
+ --->
 
 
 Codes for CosmoGridV1.1 simulations.
