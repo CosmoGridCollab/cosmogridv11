@@ -37,14 +37,14 @@ Usage
 
 There is a number of apps that can be used to accomplish consecutive stages of processing, from baryonification to projected probe maps.
 
-1 Baryonification      
- 1.1 Run halocone creation and halo profiling:  `cosmogridv1/apps/run_baryonification.py profile_halos`     
- 1.2 Displace shells using the halocone: `/cosmogridv1/apps/run_baryonification.py displace_shells`     
+1. Baryonification      
+   1.1 Run halocone creation and halo profiling:  `cosmogridv1/apps/run_baryonification.py profile_halos`     
+   1.2 Displace shells using the halocone: `/cosmogridv1/apps/run_baryonification.py displace_shells`     
 
-2 Create projected probe maps      
- 2.1 Create shell permutation table, including perturbations to n(z): `cosmogridv1/apps/run_create_permutation_table.py`      
- 2.2 Create probe kernels: `cosmogridv1/apps/run_create_probe_kernels.py`      
- 2.3 Create projected probe maps: `cosmogridv1/apps/run_project_shells.py`      
+2. Create projected probe maps      
+   2.1 Create shell permutation table, including perturbations to n(z): `cosmogridv1/apps/run_create_permutation_table.py`      
+   2.2 Create probe kernels: `cosmogridv1/apps/run_create_probe_kernels.py`      
+   2.3 Create projected probe maps: `cosmogridv1/apps/run_project_shells.py`      
 
 
 
