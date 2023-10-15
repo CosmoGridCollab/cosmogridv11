@@ -28,7 +28,7 @@ Installation
 
 For now, please use:
 
-`python setup.py install`
+``python setup.py install``
 
 
 
