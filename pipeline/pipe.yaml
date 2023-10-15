@@ -1,0 +1,38 @@
+# make stage3_hires shells for the entire cosmogrid
+
+# create kernels
+
+- name: ker_stage3_hires
+  cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_create_probe_kernels.py --config=config_hires.yaml --dir_out=CosmoGrid/stage3_hires --tasks="0>2521" --n_cores=2521 --verbosity=info --mode=jobarray
+
+- name: map_stage3_hires_fiducial
+  cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/stage3_hires --par_ids="0:17" --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info
+  dep: ker_stage3_hires
+
+- name: map_stage3_hires_grid
+  cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/stage3_hires --par_ids="17:2517" --tasks="0>17500" --n_cores=17500 --mode=jobarray --verbosity=info
+  dep: ker_stage3_hires
+
+- name: map_stage3_hires_benchmark
+  cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/stage3_hires --par_ids="2517:2521" --tasks="0>28" --n_cores=28 --mode=jobarray --verbosity=info
+  dep: ker_stage3_hires
+
+
+# project maps
+
+- name: ker_stage3_hires
+  cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_create_probe_kernels.py --config=config_hires.yaml --dir_out=CosmoGrid/stage3_hires --tasks="0" --verbosity=info
+
+- name: map_stage3_hires_fiducial
+  cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/stage3_hires --par_ids="0" --tasks="0" --verbosity=info
+  dep: ker_stage3_hires
+
+- name: map_stage3_hires_grid
+  cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/stage3_hires --par_ids="17" --tasks="0" --verbosity=info
+  dep: ker_stage3_hires
+
+- name: map_stage3_hires_benchmark
+  cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/stage3_hires --par_ids="2517" --tasks="0" --verbosity=info
+  dep: ker_stage3_hires
+
+

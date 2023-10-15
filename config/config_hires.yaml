@@ -1,0 +1,51 @@
+tag: stage3hires
+probes: ['kg', 'ia', 'dg']
+
+redshifts_nz:
+
+  - name: stage3_lensing1
+    file: $MODULE_DIR/resources//redshift_distributions/nz_DES_1.txt
+    probes: ['kg', 'ia', 'dg']
+    probes: ['dg']
+    z_max: 2.5
+
+  - name: stage3_lensing2
+    file: $MODULE_DIR/resources//redshift_distributions/nz_DES_2.txt
+    probes: ['kg', 'ia', 'dg']
+    z_max: 2.5
+
+  - name: stage3_lensing3
+    file: $MODULE_DIR/resources//redshift_distributions/nz_DES_3.txt
+    probes: ['kg', 'ia', 'dg']
+    z_max: 2.5
+
+  - name: stage3_lensing4
+    file: $MODULE_DIR/resources//redshift_distributions/nz_DES_4.txt
+    probes: ['kg', 'ia', 'dg']
+    z_max: 2.5
+
+  - name: cmb
+    z_cmb: 1090.
+    probes: ['k_cmb']
+    file_high_z_cls: 
+      k_cmb: /cluster/work/refregier/tomaszk/projects/220708_cosmogrid_paper/005_cosmogridv11/cls_cmblensing_from_z3p5.h5
+
+paths:
+  cosmogrid_root: tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/
+
+projection:
+  shell_perms: True
+  shell_perms_seed: 424242
+  n_max_shells: 69
+  n_steps: 140
+  n_max_replicas: 7
+  n_max_sims_use: inf
+
+analysis_variants:
+  - nobaryons512
+  - baryonified512
+
+baryonification:
+  nside_out: 1024
+  tag: baryonified1024
+

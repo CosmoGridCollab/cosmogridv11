@@ -1,0 +1,59 @@
+tag: DESY3
+paths:
+  cosmogrid_root: tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/
+  redshifts_nz:
+
+    - name: desy3metacal1
+      file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_source_bin1.txt
+      probes: ['kg', 'ia', 'dg']
+
+    - name: desy3metacal2
+      file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_source_bin2.txt
+      probes: ['kg', 'ia', 'dg']
+
+    - name: desy3metacal3
+      file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_source_bin3.txt
+      probes: ['kg', 'ia', 'dg']
+
+    - name: desy3metacal4
+      file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_source_bin4.txt
+      probes: ['kg', 'ia', 'dg']
+
+    - name: desy3maglim1
+      file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin1.txt
+      probes: ['dg']
+
+    - name: desy3maglim2
+      file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin2.txt
+      probes: ['dg']
+
+    - name: desy3maglim3
+      file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin3.txt
+      probes: ['dg']
+
+    - name: desy3maglim4
+      file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin4.txt
+      probes: ['dg']
+
+    - name: desy3maglim5
+      file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin5.txt
+      probes: ['dg']
+
+    - name: desy3maglim6
+      file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin6.txt
+      probes: ['dg']
+
+probe_kernels:
+  z_max: 3.0
+
+projection:
+  shell_perms: True
+  seed_shell_perms: 41
+  n_max_shells: 69
+  n_steps: 140
+  n_max_replicas: 7
+  n_max_sims_use: inf
+
+analysis_variants:
+  - baryonified512
+  - nobaryons512

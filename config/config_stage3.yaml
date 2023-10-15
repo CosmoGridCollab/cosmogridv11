@@ -1,0 +1,37 @@
+tag: test
+probes: ['kg', 'ia', 'dg']
+paths:
+  cosmogrid_root: tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/
+  redshifts_nz:
+
+    - name: stage3_lensing1
+      file: $MODULE_DIR/resources//redshift_distributions/nz_DES_1.txt
+      probes: ['kg', 'ia', 'dg']
+
+    - name: stage3_lensing2
+      file: $MODULE_DIR/resources//redshift_distributions/nz_DES_2.txt
+      probes: ['kg', 'ia', 'dg']
+
+    - name: stage3_lensing3
+      file: $MODULE_DIR/resources//redshift_distributions/nz_DES_3.txt
+      probes: ['kg', 'ia', 'dg']
+
+    - name: stage3_lensing4
+      file: $MODULE_DIR/resources//redshift_distributions/nz_DES_4.txt
+      probes: ['kg', 'ia', 'dg']
+
+probe_kernels:
+  z_max: 2.5
+
+projection:
+  shell_perms: True
+  seed_shell_perms: 41
+  n_max_shells: 69
+  n_steps: 140
+  n_max_replicas: 7
+  n_max_sims_use: inf
+
+analysis_variants:
+  - nobaryons512
+  - baryonified512
+
