@@ -54,6 +54,7 @@ The output files will contain full-sky probe maps, without noise, masks, and sys
 The intrinsic alignment map can be added to the convergence map with an appropriate amplitude.
 Galaxy overdensity maps can be multiplied by a bias parameter.
 Downstream processig for applying survey masks, noise, systematics, etc, is not part of this pipeline and left for the user.
+For usage of each app, use the help command, example ``cosmogridv1/apps/run_baryonification.py --help``.
 
 
 
