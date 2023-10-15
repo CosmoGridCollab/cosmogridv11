@@ -66,6 +66,8 @@ Features
 * Create website for API documentation 
 * Add description of the config file
 * Add description of output files
+* Add description of the permutation table
+
 
 Credits
 -------
