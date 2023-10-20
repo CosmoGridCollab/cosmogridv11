@@ -67,9 +67,9 @@ Additional notes:
 
 * The lensing map ``kg`` is noise free. To use it, subtract the mean and add shape noise.
 * The intrinsic alignment map ``ia`` is an NLA model with $A_{IA}=1$. To use it, scale according to desired $A_{IA}$ and add to the lensing convergence map.
-* The clustering map ``dg`` is an overdensity map $\delta_g = (\delta - \delta)/(\delta)$. To use it, multiply by a bias function and add Poisson noise $\delta_g = Poisson(1+b \delta)$
+* The clustering map ``dg`` is an overdensity map $n_g = (\delta - \bar \delta)/(\bar \delta)$. To use it, multiply by a bias function and add Poisson noise $\delta_g = Poisson( \bar N(1+b \delta_g) ) $
 
-Features
+TODO:
 --------
 
 * Create website for API documentation 
