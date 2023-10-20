@@ -58,6 +58,37 @@ For usage of each app, use the help command, example ``cosmogridv1/apps/run_bary
 
 
 
+============
+CosmoGridV11: LSST-DESC Y1 Trial
+============
+
+### Stage-III forecast probe maps 
+
+Probe maps that can be used for making forecasts for Stage-3 large scale structure surveys are stored in `CosmoGrid/lsstdescy1trial` and condain: full sky projected weak lensing, intrinsic alignment, and galaxy clustering maps at nside=1024 for a LSST Y1.
+The redshift bins used were 
+This data is described in [Kacprzak et al. 2022]https://arxiv.org/abs/2209.04662).
+
+.. list-table:: Title
+   :widths: 25 25 50
+   :header-rows: 1
+
+   * - file name
+     - Heading row 1, column 2
+     - file content
+   * - comments   
+     -
+     - Row 1, column 3
+   * - Row 2, column 1
+     - Row 2, column 2
+     - Row 2, column 3
+
+| file name     | file content  | comments      |
+| ------------- | ------------- | ------------- |
+| `realization/projected_probes_maps_v11dmb.h5`   | HDF5 store with baryonified probe maps for 4 redshift bins for lensing, clustering and intrinsic alignment probes | the HDF5 file has the following structure: `probe/sample`|                            
+| `realization/projected_probes_maps_v11dmo.h5`     | Same as above, but with no baryonification | same as above |                          
+| `realization/shell_permutations_index.h5`               | HDF5 store with information about the shell selection for the shell permutation scheme | contains datsets:  <br /> `shell_groups`: list of shell groups taken from different simulations   <br /> `perms_info`: information which simulation to use for each shell group and whether to apply rotations or flips (see below for description of this table)|                
+| `realization/probe_weights.h5`                            | HDF store with probe projection kernels, single value for shell mean redshift | datasets are organized as `probe/sample` | 
+
 
 
 Features
