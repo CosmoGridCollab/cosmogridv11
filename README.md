@@ -47,12 +47,16 @@ For usage of each app, use the help command, example ``cosmogridv1/apps/run_bary
 
 
 Probe maps that can be used for making forecasts for LSST-DESC-Y1 are stored in `CosmoGrid/lsstdescy1trial` and condain: full sky projected weak lensing, intrinsic alignment, and galaxy clustering maps at nside=1024 for a LSST Y1.
-The redshift bins used were 
+The redshift bins used are [here](https://github.com/LSSTDESC/forecasting/tree/main/updated_forecasts/datafiles/z_bins).
 This data is described in [Kacprzak et al. 2022]https://arxiv.org/abs/2209.04662).
-### Stage-III forecast probe maps 
 
-Probe maps that can be used for making forecasts for Stage-3 large scale structure surveys are stored in `CosmoGrid/stage3_forecast` and condain: full sky projected weak lensing, intrinsic alignment, and galaxy clustering maps at nside=512 for a Stage-III survey forecast. 
-This data is described in [Kacprzak et al. 2022](https://arxiv.org/abs/2209.04662).
+The file structure is 
+
+`CosmoGrid/lsstdescy1trial/dataset_type/cosmology/realization/`
+
+where `dataset_type=[fiducial, grid]` and `realization=perm_*` is the semi-independent realization. In the `lsstdescy1trial`, there are 10 realizations for `fiducial` and 2 realizations for `grid`.
+
+In each of these directories, the files are:
 
 | file name     | file content  | comments      |
 | ------------- | ------------- | ------------- |
