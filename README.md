@@ -53,7 +53,7 @@ For usage of each app, use the help command, example ``cosmogridv1/apps/run_bary
 
 Probe maps that can be used for making forecasts for LSST-DESC-Y1 are stored in `CosmoGrid/lsstdescy1trial` and condain: full sky projected weak lensing, intrinsic alignment, and galaxy clustering maps at nside=1024 for a LSST Y1.
 The redshift bins used are [here](https://github.com/LSSTDESC/forecasting/tree/main/updated_forecasts/datafiles/z_bins).
-This data is described in [Kacprzak et al. 2022]https://arxiv.org/abs/2209.04662).
+This data is described in [Kacprzak et al. 2022](https://arxiv.org/abs/2209.04662).
 
 The file structure is 
 
