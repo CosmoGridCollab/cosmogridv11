@@ -22,17 +22,22 @@ There is a number of apps that can be used to accomplish consecutive stages of p
 
 1)  Baryonification      
 
-    1.1 Run halocone creation and halo profiling:  ``cosmogridv1/apps/run_baryonification.py profile_halos``     
+    1.1 Run halocone creation and halo profiling:      
+    ``python cosmogridv1/apps/run_baryonification.py profile_halos --help``     
 
-    1.2 Displace shells using the halocone: ``cosmogridv1/apps/run_baryonification.py displace_shells``     
+    1.2 Displace shells using the halocone:      
+    ``python cosmogridv1/apps/run_baryonification.py displace_shells --help``     
 
-2)  Create projected probe maps      
+3)  Create projected probe maps      
 
-    2.1 Create shell permutation table, including perturbations to n(z): ``cosmogridv1/apps/run_create_permutation_table.py``      
+    2.1 Create shell permutation table, including perturbations to n(z):      
+    ``python cosmogridv1/apps/run_create_permutation_table.py --help``      
 
-    2.2 Create probe kernels: ``cosmogridv1/apps/run_create_probe_kernels.py``      
+    2.2 Create probe kernels:      
+    ``python cosmogridv1/apps/run_create_probe_kernels.py --help``      
 
-    2.3 Create projected probe maps: ``cosmogridv1/apps/run_project_shells.py``      
+    2.3 Create projected probe maps:      
+     ``python cosmogridv1/apps/run_project_shells.py --help``      
 
 The output files will contain full-sky probe maps, without noise, masks, and systematics.
 The intrinsic alignment map can be added to the convergence map with an appropriate amplitude.
