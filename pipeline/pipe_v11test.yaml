@@ -1,0 +1,13 @@
+# full cosmogridv1.1 pipeline
+
+- name: baryonification_profile
+  cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_v11test.yaml  --dir_out=v11test --tasks="0>20920" --n_cores=2092 --verbosity=warning --mode=jobarray
+
+- name: baryonification_displace
+  cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_v11test.yaml  --dir_out=v11test --tasks="0>20900" --n_cores=2092  --verbosity=info --mode=jobarray
+
+- name: permutation_table
+  cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_create_permutation_table.py --config=config_v11test.yaml --dir_out=v11test
+
+- name: project_shells
+  cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_v11test.yaml   --dir_out=v11test --tasks="0>42040" --verbosity=info --mode=jobarray --n_cores=1051 

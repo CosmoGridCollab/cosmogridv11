@@ -1,0 +1,75 @@
+tag: v11test
+
+redshifts_nz:
+
+  - name: metacal1
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_source_bin1.txt
+    probes: ['kg', 'dg', 'ia']
+    z_max: 3.0
+    
+  - name: metacal2
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_source_bin2.txt
+    probes: [kg', 'dg', 'ia']
+    z_max: 3.0
+
+  - name: metacal3
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_source_bin3.txt
+    probes: [kg', 'dg', 'ia']
+    z_max: 3.0
+
+  - name: metacal4
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_source_bin4.txt
+    probes: [kg', 'dg', 'ia']
+    z_max: 3.0
+
+  # 2209.05853 Table 4. 
+  - name: maglim1
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin1.txt
+    probes: ['dg', 'dg2']
+    z_max: 3.0
+
+  - name: maglim2
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin2.txt
+    probes: ['dg', 'dg2']
+    z_max: 3.0
+
+  - name: maglim3
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin3.txt
+    probes: ['dg', 'dg2']
+    z_max: 3.0
+
+  - name: maglim4
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin4.txt
+    probes: ['dg', 'dg2']
+    z_max: 3.0
+
+  - name: cmb
+    z_cmb: 1090.
+    file_high_z_cls: 
+      kcmb: $MODULE_DIR/resources/cls_cmblensing_from_z3p5_v2.h5
+    probes: ['kcmb']
+
+paths:
+  cosmogrid_root: /global/cfs/cdirs/des/cosmogrid/
+  redshift_perturbations_list: $MODULE_DIR/../../v11test/metainfo_perms.npy
+
+projection:
+  shell_perms: True
+  shell_perms_seed: 424242
+  n_max_shells: 69
+  n_steps: 140
+  n_max_replicas: 7
+  n_max_sims_use: inf
+  n_perms_per_cosmo:
+    fiducial: 1000
+    grid: 10
+    benchmarks: 10
+
+analysis_variants:
+  - v11dmb
+  - v11dmo
+
+baryonification:
+  nside_out: 1024
+  tag: v11
+  interp_halo_displacements: True # interpolation massively speeds up halo profiling
