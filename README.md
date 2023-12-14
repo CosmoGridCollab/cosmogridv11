@@ -46,6 +46,23 @@ Downstream processig for applying survey masks, noise, systematics, etc, is not 
 For usage of each app, use the help command, example ``cosmogridv1/apps/run_baryonification.py --help``.
 
 
+## CosmoGridV11: baryonification output files
+
+The barynification script `run_baryonification displace_shells` outputs a shell lightcone in a new storage format. 
+It contains both baryonified (dmb) and dark matter -only (dmo) maps, in a compressed format.
+This saves storage.
+
+The HDF file `baryonified_shells_v11.h5` contains the following datasets:
+
+| dataset | content |
+| ------------- | ------------- | 
+| `nobaryon_shells` | original shells (dmo) without baryonification | 
+| `diff_shell_inds` | indices of healpix pixels that are different between the dmo and dmb | 
+| `diff_shell_vals | difference between values of dmo and dmb for the modified pixels |
+| `shell_dicts` | shell information |
+
+This file can be read using the function `utils_maps.load_v11_shells(path_sim, variant=[dmo, dmb])` where `path_sim` is the path to the `.h5` file and `variant` is the needed version dmo or dmb.
+
 
 
 ## CosmoGridV11: LSST-DESC Y1 Trial
