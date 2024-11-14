@@ -26,18 +26,15 @@ There is a number of apps that can be used to accomplish consecutive stages of p
     ``python cosmogridv1/apps/run_paramtables.py baryon_params --help``     
 
     1.2 Run halocone creation and halo profiling:      
-    ``python cosmogridv1/apps/run_baryonification.py profile_halos --help``     
+    ``python cosmogridv1/apps/run_haloops.py profile_halos --help``     
 
     1.3 Displace shells using the halocone:      
-    ``python cosmogridv1/apps/run_baryonification.py displace_shells --help``     
+    ``python cosmogridv1/apps/run_haloops.py displace_shells --help``     
 
 3)  Create projected probe maps      
 
     2.1 Create shell permutation table, including perturbations to n(z):      
-    ``python cosmogridv1/apps/run_create_permutation_table.py --help``      
-
-    2.2 Create probe kernels:      
-    ``python cosmogridv1/apps/run_create_probe_kernels.py --help``      
+    ``python cosmogridv1/apps/run_paramtables.py shell_permutations --help``      
 
     2.3 Create projected probe maps:      
      ``python cosmogridv1/apps/run_project_shells.py --help``      
