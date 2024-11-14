@@ -4,7 +4,7 @@ Codes for CosmoGridV1.1 simulations.
 
 * Free software: GNU General Public License v3
 * Documentation: www.cosmogrid.ai 
-* Paper: Kacprzak et al. 2023 https://arxiv.org/abs/2209.04662
+* Paper: Kacprzak and Fluri et al. 2023 https://arxiv.org/abs/2209.04662
 
 
 ## Installation
