@@ -48,57 +48,12 @@ For usage of each app, use the help command, example ``cosmogridv1/apps/run_bary
 
 ## CosmoGridV11: baryonification output files
 
-The barynification script `run_baryonification displace_shells` outputs a shell lightcone in a new storage format. 
-It contains both baryonified (dmb) and dark matter -only (dmo) maps, in a compressed format.
-This saves storage.
-
-The HDF file `baryonified_shells_v11.h5` contains the following datasets:
-
-| dataset | content |
-| ------------- | ------------- | 
-| `nobaryon_shells` | original shells (dmo) without baryonification | 
-| `diff_shell_inds` | indices of healpix pixels that are different between the dmo and dmb | 
-| `diff_shell_vals | difference between values of dmo and dmb for the modified pixels |
-| `shell_dicts` | shell information |
-
-This file can be read using the function `utils_maps.load_v11_shells(path_sim, variant=[dmo, dmb])` where `path_sim` is the path to the `.h5` file and `variant` is the needed version dmo or dmb.
-
-
-
 ## CosmoGridV11: LSST-DESC Y1 Trial
 
-
-Probe maps that can be used for making forecasts for LSST-DESC-Y1 are stored in `CosmoGrid/lsstdescy1trial` and condain: full sky projected weak lensing, intrinsic alignment, and galaxy clustering maps at nside=1024 for a LSST Y1.
-The redshift bins used are [here](https://github.com/LSSTDESC/forecasting/tree/main/updated_forecasts/datafiles/z_bins).
-This data is described in [Kacprzak et al. 2022](https://arxiv.org/abs/2209.04662).
-
-The file structure is 
-
-`CosmoGrid/lsstdescy1trial/dataset_type/cosmology/realization/`
-
-where `dataset_type=[fiducial, grid]` and `realization=perm_*` is the semi-independent realization. In the `lsstdescy1trial`, there are 10 realizations for `fiducial` and 2 realizations for `grid`.
-
-In each of these directories, the files are:
-
-| file name     | file content  | comments      |
-| ------------- | ------------- | ------------- |
-| `realization/projected_probes_maps_v11dmb.h5`   | HDF5 store with baryonified probe maps for 4 redshift bins for lensing, clustering and intrinsic alignment probes | the HDF5 file has the following structure: `probe/sample`|                            
-| `realization/projected_probes_maps_v11dmo.h5`     | Same as above, but with no baryonification | same as above |                          
-| `realization/shell_permutations_index.h5`               | HDF5 store with information about the shell selection for the shell permutation scheme | contains datsets:  <br /> `shell_groups`: list of shell groups taken from different simulations   <br /> `perms_info`: information which simulation to use for each shell group and whether to apply rotations or flips (see below for description of this table)|                
-| `realization/probe_weights.h5`                             | HDF store with probe projection kernels, single value for shell mean redshift | datasets are organized as `probe/sample` | 
-
-
-
-Additional notes:
-
-* The lensing map ``kg`` is noise free. To use it, subtract the mean and add shape noise.
-* The intrinsic alignment map ``ia`` is an NLA model with $A_{IA}=1$. To use it, scale according to desired $A_{IA}$ and add to the lensing convergence map.
-* The clustering map ``dg`` is an overdensity map $n_g = (\delta - \bar \delta)/(\bar \delta)$. To use it, multiply by a bias function and add Poisson noise $\delta_g = Poisson( \bar N(1+b \delta_g) ) $
 
 TODO:
 --------
 
-* Create website for API documentation 
-* Add description of the config file
-* Add description of output files
-* Add description of the permutation table
+* New baryonification parameters interface
+* Re-run with new codes
+* Write docs for new codes
