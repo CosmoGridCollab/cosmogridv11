@@ -58,6 +58,8 @@ Downstream processig for applying survey masks, noise, systematics, etc, is not 
 | `shell_info` | shell info for *baryonified* parameters, matching the paths in `parameters`.  |
 
 
+# Below will be replaced
+
 
 
 ### The profiled halos catalog, `profiled_halos_v11.h5`
