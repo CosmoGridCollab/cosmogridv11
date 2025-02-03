@@ -5,9 +5,116 @@
 # Author: Silvan Fischbacher & Tomasz Kacprzak
 # From: https://cosmo-gitlab.phys.ethz.ch/cosmo_public/redshift_tools/-/blob/master/src/redshift_tools/manipulate.py
 
+from cosmogridv1 import utils_logging
+from UFalcon import probe_weights
+
+import warnings
+warnings.filterwarnings('ignore', category=DeprecationWarning)
+warnings.filterwarnings('ignore', category=RuntimeWarning)
+warnings.filterwarnings('once', category=UserWarning)
+LOGGER = utils_logging.get_logger(__file__)
+
 import numpy as np
 from scipy.optimize import bisect
 from scipy.interpolate import interp1d
+from scipy.integrate import quad
+
+def modify_nz(nz, redshift_params, tag, method='fischbacher'):
+
+    if np.all(redshift_params==0):
+        
+        return nz 
+
+    else:
+
+        if method == 'fischbacher':
+
+            z_ = nz[:,0]
+            nz_ = nz[:,1]/np.sum(nz[:,1])
+
+            sigma_z =  np.sqrt(np.sum( nz_ * (z_-np.sum(nz_*z_))**2 ))
+            mean_z = np.sum(nz_ * z_)
+
+            shift = redshift_params[0]
+            stretch = (sigma_z-redshift_params[1])/sigma_z
+            nz_mod = shift_and_stretch(nz=[nz], 
+                                       z_bias=[shift], 
+                                       z_sigma=[stretch], # multiplicative stretch used in utils_redshift, config interface uses additive stretch
+                                       normalize=True)[0]
+
+            LOGGER.info(f'bin={tag} mean_z={mean_z: 2.4e} sigma_z={sigma_z: 2.4e} shift={shift: 2.4e} stretch={stretch: 2.4e}')
+
+        elif method == 'desy3':
+
+
+            get_mean_z = lambda  z, nz : np.trapz(nz * z, x=z)
+            get_sigma_z = lambda  z, nz : np.sqrt(np.trapz( nz * (z-get_mean_z(z, nz))**2, x=z ))
+
+            z_ = nz[:,0]
+            nz_ = nz[:,1]/np.sum(nz[:,1])
+            mean_z_orig = get_mean_z(z_, nz_)
+            sigma_z_orig =  get_sigma_z(z_, nz_)
+                
+            delta = redshift_params[0]
+            sigma = redshift_params[1] + 1 # in DES Y3 convention, no stretch gives sigma=1
+            nz_mod = shift_stretch_desy3(nz, delta_z=delta, sigma_z=sigma)
+            # nz_mod = np.copy(nz) # control test
+            # nz_mod[:,1] = nz_mod[:,1]/np.sum(nz_mod[:,1])
+            # warnings.warn('testing nz modifications, setting nz_mod to original')
+
+            nz_mod_ = nz_mod[:,1]
+            mean_z_mod = get_mean_z(z_, nz_mod_)
+            sigma_z_mod =  get_sigma_z(z_, nz_mod_)
+
+            LOGGER.info(f'bin={tag} delta={delta: 2.4e} sigma={sigma: 2.4e}')
+            LOGGER.info(f'mean_z  = {mean_z_orig: 2.4e} -> {mean_z_mod: 2.4e}')
+            LOGGER.info(f'sigma_z = {sigma_z_orig: 2.4e} -> {sigma_z_mod: 2.4e}')
+
+    
+    return nz_mod
+
+
+def shift_stretch_desy3(nz, delta_z, sigma_z):
+    """Shift and stretch nz according to the DES Y3 formula
+    https://ui.adsabs.harvard.edu/abs/2022PhRvD.106j3530P/abstract equations 18 and 19
+    There is a typo in Eqn 18, delta_z should have a + sign
+    ni(z) = nipz(z − ∆zi). --> ni(z) = nipz(z + ∆zi).
+
+    There is a mistake in https://ui.adsabs.harvard.edu/abs/2022PhRvD.105b3520A/abstract
+    equations 15, the correct equations is https://ui.adsabs.harvard.edu/abs/2022PhRvD.106j3530P/abstract equations Eqn 19
+    
+    Parameters
+    ----------
+    z : redshift
+        Description
+    nz : dn/dz
+        Description
+    delta_z : shift parameter
+        Description
+    sigma_z : stretch parameter
+        Description
+    """
+
+    z_, nz_ = nz[:,0], nz[:,1]
+
+    # nz_ = nz_/np.sum(nz_)
+    nz_ = nz_/np.trapz(nz_, x=z_)
+    
+    # typo in eqn 
+    z_shift = z_ + delta_z
+    nz_shift = resample(xp=z_, x=z_shift, y=nz_, interp_kind="linear")
+    z_mean = np.trapz(nz_shift * z_, x=z_)
+    z_stretch = (z_ - z_mean)*sigma_z + z_mean
+    nz_stretch = resample(xp=z_, x=z_stretch, y=nz_shift, interp_kind="linear")
+    nz_final = nz_stretch
+
+
+    nz_out = np.vstack([z_, nz_final]).T
+
+    return nz_out
+    
+
+
 
 
 def resample(xp, x, y, interp_kind="linear"):
@@ -20,9 +127,9 @@ def resample(xp, x, y, interp_kind="linear"):
     :param interp_kind: interpolation method
     :return: resampled distribution
     """
-    yp = interp1d(x=xp, y=y, kind=interp_kind, fill_value="extrapolate")(x)
+    yp = interp1d(x=x, y=y, kind=interp_kind, fill_value="extrapolate")(xp)
     yp = np.clip(yp, a_min=0, a_max=np.inf)
-    yp = yp / np.sum(yp)
+    yp = yp / np.trapz(yp, x=xp)
     return yp
 
 

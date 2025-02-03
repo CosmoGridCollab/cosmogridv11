@@ -19,9 +19,7 @@ from . import utils_logging
 
 logger = utils_logging.get_logger(__file__)
 
-
 SEMAPHORE_DIRECTORY = os.path.expanduser('~/copy_guardian_semaphores')
-
 
 if not os.path.isdir(SEMAPHORE_DIRECTORY):
     try:
@@ -37,6 +35,11 @@ class NoFileException(Exception):
 class CopyGuardian(object):
 
     def __init__(self, n_max_connect, n_max_attempts_remote, time_between_attempts, use_copyfile=False):
+
+        assert time_between_attempts>0, "time_between_attempts should be >0"
+        assert n_max_connect>0, "n_max_connect should be >0"
+        assert n_max_attempts_remote>0, "n_max_attempts_remote should be >0"
+
         self.n_max_connect = n_max_connect
         self.n_max_attempts_remote = n_max_attempts_remote
         self.time_between_attempts = time_between_attempts
@@ -154,12 +157,18 @@ class CopyGuardian(object):
 
     def _wait_for_allowance(self):
 
+        n_attempts=0
+
         while True:
 
-            time.sleep(1 + random.random())
+            time.sleep(1 + random.random()*10)
 
             file_list = os.listdir(SEMAPHORE_DIRECTORY)
             file_list = list(filter(lambda filename: not filename.startswith('.'), file_list))
+
+            n_attempts+=1
+            if n_attempts % 200 == 0:
+                logger.info(f'waiting for semaphore n_attempts={n_attempts}')
 
             if len(file_list) < self.n_max_connect:
                 return
@@ -197,13 +206,21 @@ class CopyGuardian(object):
 
         for s in sources:
 
-            host = s.split(':/')[0]
+            if ':/' in s:
 
-            if host in host_dict:
-                host_dict[host].append(s)
+                host = s.split(':/')[0]
+
+                if host in host_dict:
+                    host_dict[host].append(s)
+
+                else:
+                    host_dict[host] = [s]
 
             else:
-                host_dict[host] = [s]
+
+                host_dict.setdefault('local', [])
+                host_dict['local'].append(s)
+
         
         return host_dict.values()
 

@@ -1,10 +1,10 @@
 import os, sys
 
-def get_filename_probe_weights(dir_out):
+def get_filename_probe_kernels(dir_out):
 
     return os.path.join(dir_out, f'probe_weights.h5')
 
-def get_dirname_probe_weights(dir_out, cosmo_params, project_tag):
+def get_dirname_probe_kernels(dir_out, cosmo_params, project_tag):
 
     dir_output = os.path.join(dir_out, cosmo_params['path_par'].replace('raw', project_tag))
     return dir_output
@@ -27,7 +27,9 @@ def get_filepath_permutations_index(dir_out):
 
 def get_dirname_projected_maps(dir_out, cosmo_params, project_tag, id_run):
 
-    dir_output = os.path.join(dir_out, cosmo_params['path_par'].replace('raw', project_tag), f"run_{id_run}")
+    dirtag = f'/proj_{project_tag}/'
+    path_par = cosmo_params['path_par'].replace('/bary/', dirtag).replace('/raw/', dirtag)
+    dir_output = os.path.join(dir_out, path_par, f"run_{id_run}")
     return dir_output
 
 def get_dirname_permuted_maps(dir_out, cosmo_params, project_tag, id_perm):
@@ -62,3 +64,19 @@ def get_filename_baryonification_info(dir_out, tag):
 def get_filepath_permlist(dir_out):
 
     return os.path.join(dir_out, f'metainfo_perms.npy')    
+
+def get_filepath_barylist(dir_out, tag):
+
+    return os.path.join(dir_out, f'CosmoGridV11_metainfo_bary_{tag}.h5')    
+
+
+def get_filepath_haloshells(dir_out, tag):
+
+    return os.path.join(dir_out, f'haloshells_{tag}.h5')
+
+def get_filename_compressed_shells(path_sim):
+
+    # high redshift resolution shells are stored in h5 as opposed to npz
+    fname = 'compressed_shells.h5' if 'redshift_resolution' in path_sim else 'compressed_shells.npz'
+    
+    return fname

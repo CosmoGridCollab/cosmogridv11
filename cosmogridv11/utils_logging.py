@@ -99,6 +99,7 @@ def get_logger(filepath, logging_level=None, progressbar_color='red'):
     logger.progressbar = Progressbar(logger)
     logger.timer = Timer()
     logger.islevel = lambda level: logging._nameToLevel[level.upper()]==logger.level
+    logger.memlog = Memlog(logger)
 
     return logger
 
@@ -122,8 +123,30 @@ def memory_usage_psutil():
 
     import os, psutil;
     return psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
-    return mem
+    
 
+def memory_usage_str():
+
+    import os, psutil;
+    mem = psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
+    return '{:8.1f} MiB'.format(mem)
+
+
+
+class Memlog():
+
+    def __init__(self, logger=None):
+
+        self.logger = logger
+
+    def __call__(self,  at_level='debug,info,warning,error'):
+
+        lvls = [logging._nameToLevel[l.upper()] for l in at_level.split(',')]
+
+        mem = memory_usage_str()
+
+        if self.logger.level in lvls:
+            self.logger.log(self.logger.level, 'memory usage ' + mem)
 
 
 

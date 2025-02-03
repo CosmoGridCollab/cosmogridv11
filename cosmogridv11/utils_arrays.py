@@ -2,6 +2,26 @@ import os, sys, logging, collections, numpy as np
 from . import utils_logging
 LOGGER = utils_logging.get_logger(__file__)
 
+def drop_cols(a, *fieldnames_to_remove):
+    a = a[ [ name for name in a.dtype.names if name not in fieldnames_to_remove ] ]
+    return rewrite(a)
+
+
+def rename_cols(a, src, dst):
+
+    new_names = []
+    for c in a.dtype.names:
+
+        ind = [i for i,s in enumerate(src) if s==c]
+        if len(ind)>0:
+            new_names.append(dst[ind[0]])
+        else:
+            new_names.append(c)
+                    
+    a.dtype.names = new_names
+
+    return a
+
 def rewrite(a):
 
     names = [f for f in a.dtype.fields]
@@ -118,5 +138,57 @@ def zeros_rec(n, columns):
     return np.zeros(n, dtype=get_dtype(columns))
 
 
+def merge_recs(recs):
+
+    assert len(np.unique([len(r) for r in recs]))==1, "all recs should have the same lengths"
+
+    dtype = []
+    for r in recs:
+        dtype += r.dtype.descr
+    dtype = np.dtype(dtype)
+    out = np.empty(len(recs[0]), dtype)
+
+    for r in recs:
+        for c in r.dtype.names:
+            out[c] = r[c]
+
+    return out
+
+
+def unicode_to_ascii(rec):
+
+    formats = []
+    for col in rec.dtype.names:
+        dt = rec[col].dtype
+        if dt.kind == 'U':
+            nchars = dt.itemsize // 4
+            formats.append(f'S{nchars}')
+        else:
+            formats.append(dt.str)
+
+    dtype_out = np.dtype(dict(names=rec.dtype.names, formats=formats))
+    rec_new = np.empty(len(rec), dtype=dtype_out)
+    for col in rec.dtype.names:
+        rec_new[col] = rec[col]
+
+    return rec_new
+
+
+def ascii_to_unicode(rec):
+
+    formats = []
+    for col in rec.dtype.names:
+        dt = rec[col].dtype
+        if dt.kind == 'S':
+            formats.append('U512')
+        else:
+            formats.append(dt.str)
+
+    dtype_out = np.dtype(dict(names=rec.dtype.names, formats=formats))
+    rec_new = np.empty(len(rec), dtype=dtype_out)
+    for col in rec.dtype.names:
+        rec_new[col] = rec[col]
+
+    return rec_new
 
 
