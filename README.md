@@ -82,10 +82,16 @@ Therefore some halos occur at multiple locations on the sky.
 | `shell_id` | Id of the shell the halo belongs to |
 | `halo_buffer` | If it is a halo belonging to a neighbour shell, +1/-1 for halo from a lower and higher redshift shells, respectively |
 
+#### Content of `halo_props`
+
+| field | content |
+| ------------- | ------------- | 
+| `ID` | Unique halo id |
+| `m_200c` | NFW mass in 200c units M_solar/h |
+| `r_200c` | NFW radius in 200c units Mpc/h |
+| `c_200c` | NFW concentration |
 
 
-
-# Below will be replaced
 
 
 
