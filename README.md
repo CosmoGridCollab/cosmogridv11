@@ -93,24 +93,17 @@ Therefore some halos occur at multiple locations on the sky.
 
 
 
+### The baryonified shell shell files
 
-
-
-
-The barynification script `run_baryonification displace_shells` outputs a shell lightcone in a new storage format. 
-It contains both baryonified (dmb) and dark matter -only (dmo) maps, in a compressed format.
-This saves storage.
-
-The HDF file `baryonified_shells_v11.h5` contains the following datasets:
+These files contain both the unbaryonified and baryonified maps.
+See function `utils_maps.load_v11_shells` for instructions how to load this file and get the baryonified map.
 
 | dataset | content |
 | ------------- | ------------- | 
-| `nobaryon_shells` | original shells (dmo) without baryonification | 
-| `diff_shell_inds` | indices of healpix pixels that are different between the dmo and dmb | 
-| `diff_shell_vals | difference between values of dmo and dmb for the modified pixels |
-| `shell_dicts` | shell information |
+| `nobaryon_shells/shell{:03d}` | unbaryonified shells at the specified baryonification nside |
+| `diff_shell_inds/shell{:03d}` | indices of pixels that are different in the baryonified shells  |
+| `diff_shell_vals/shell{:03d}` | values of pixels that are different in the baryonified shells  |
 
-This file can be read using the function `utils_maps.load_v11_shells(path_sim, variant=[dmo, dmb])` where `path_sim` is the path to the `.h5` file and `variant` is the needed version dmo or dmb.
 
 
 
