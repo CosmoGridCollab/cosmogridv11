@@ -53,7 +53,7 @@ Downstream processig for applying survey masks, noise, systematics, etc, is not 
 
 | dataset | content |
 | ------------- | ------------- | 
-| `'parameters/all` | baryonification parameters for all simultions, number of rows corresponds to the number of *baryonified* simulations | 
+| `'parameters/all` | baryonification parameters for all simultions, number of rows corresponds to the number of *baryonified* simulations. Datasets `grid`, `fiducial` and `benchmark` contain the same but split into dataset types. | 
 | `diff_shell_inds` | indices of healpix pixels that are different between the dmo and dmb | 
 | `diff_shell_vals | difference between values of dmo and dmb for the modified pixels |
 | `shell_dicts` | shell information |
