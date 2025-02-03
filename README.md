@@ -23,7 +23,8 @@ There is a number of apps that can be used to accomplish consecutive stages of p
 1)  Baryonification      
 
     1.1 Create a table that contains input parameters for baryonification, specified in `config_v11.yaml`:      
-    ``python cosmogridv1.apps.run_paramtables baryon_params --config=config_v11.yaml --help``
+    ``python cosmogridv1.apps.run_paramtables baryon_params --config=config_v11.yaml --help``     
+    
     The resulting output file will be `CosmoGridV11_bary_{tag}_metainfo.h5`, where `{tag}` is the entry in the config under `baryonification/tag:`.
     After the file is created, make sure to include it in the config under `paths/metainfo_bary:`, for later use.
 
