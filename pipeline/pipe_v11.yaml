@@ -41,15 +41,20 @@
 # redshift perturbations
 
 - name: v11desy3_shell_permtable
-  cmd: esub cosmogridv1.apps.run_paramtables shell_permutations --config=config_v11desy3.yaml --dir_out=v11desy3/   
+  cmd: esub cosmogridv1.apps.run_paramtables shell_permutations --config=config_v11desy3.yaml   --dir_out=v11desy3 --verbosity=info
 
+  
 # project shells
 
-- name: v11desy3_proj_fid1dmb
-  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3fiddmb.yaml   --num_maps_per_index=10 --dir_out=v11desy3 --tasks="0>1700"  --verbosity=info --mode=jobarray --n_cores=1700 
+- name: proj_bench
+  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml      --dir_out=v11desy3    --num_maps_per_index=10  --tasks="67079"     --verbosity=info --largemem --mode=jobarray --n_cores=1
+  
+- name: proj_fid1
+  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml      --dir_out=v11desy3    --num_maps_per_index=10 --tasks="0>1700"     --verbosity=info --mode=jobarray --n_cores=1700
 
-- name: v11desy3_proj_fid1dmo
-  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3fiddmo.yaml   --num_maps_per_index=10 --dir_out=v11desy3 --tasks="0>1700"  --verbosity=info --mode=jobarray --n_cores=1700  
+- name: proj_fid1_dmo
+  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3_dmo.yaml  --dir_out=v11desy3    --num_maps_per_index=10 --tasks="0>1700"     --verbosity=info --mode=jobarray --n_cores=1700
 
-- name: v11desy3_proj_grid
-  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3grid.yaml  --precopy --num_maps_per_index=10 --tasks="1700>6700"  --verbosity=info --mode=jobarray --n_cores=5000
+- name: proj_grid
+  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml      --dir_out=v11desy3    --num_maps_per_index=10 --tasks="1700>6700""  --verbosity=info --mode=jobarray --n_cores=5000
+
