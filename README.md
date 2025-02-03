@@ -22,31 +22,48 @@ There is a number of apps that can be used to accomplish consecutive stages of p
 
 1)  Baryonification      
 
-    1.1 Run halocone creation and halo profiling:      
-    ``python cosmogridv1/apps/run_baryonification.py profile_halos --help``     
+    1.1 Create a table that contains input parameters for baryonification, specified in `config_v11.yaml`:      
+    ``python cosmogridv1.apps.run_paramtables baryon_params --config=config_v11.yaml --help``
+    The resulting output file will be `CosmoGridV11_bary_{tag}_metainfo.h5`, where `{tag}` is the entry in the config under `baryonification/tag:`.
+    After the file is created, make sure to include it in the config under `paths/metainfo_bary:`, for later use.
 
     1.2 Displace shells using the halocone:      
-    ``python cosmogridv1/apps/run_baryonification.py displace_shells --help``     
+    ``python cosmogridv1.apps.run_haloops baryonify_shells  --config=config_v11.yaml  --help``     
 
 3)  Create projected probe maps      
 
-    2.1 Create shell permutation table, including perturbations to n(z):      
-    ``python cosmogridv1/apps/run_create_permutation_table.py --help``      
-
-    2.2 Create probe kernels:      
-    ``python cosmogridv1/apps/run_create_probe_kernels.py --help``      
-
-    2.3 Create projected probe maps:      
-     ``python cosmogridv1/apps/run_project_shells.py --help``      
+    2.1 Create shell permutation table, including perturbations to n(z), according to the config:      
+    ``python cosmogridv1.apps.run_paramtables shell_permutations --config=config_v11desy3.yaml``
+    The resulting output file will be `metainfo_perms.npy`, in the output directory.
+    After the file is created, make sure to include it in the config under `paths/redshift_perturbation_list:`, for later use.
+    
+    2.2 Create projected probe maps:      
+     ``python cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml --help``      
 
 The output files will contain full-sky probe maps, without noise, masks, and systematics.
 The intrinsic alignment map can be added to the convergence map with an appropriate amplitude.
 Galaxy overdensity maps can be multiplied by a bias parameter.
 Downstream processig for applying survey masks, noise, systematics, etc, is not part of this pipeline and left for the user.
-For usage of each app, use the help command, example ``cosmogridv1/apps/run_baryonification.py --help``.
 
 
-## CosmoGridV11: baryonification output files
+## CosmoGridV11: output files
+
+
+### WIP
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 The barynification script `run_baryonification displace_shells` outputs a shell lightcone in a new storage format. 
 It contains both baryonified (dmb) and dark matter -only (dmo) maps, in a compressed format.
