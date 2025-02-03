@@ -427,7 +427,8 @@ def create_baryonification_parameters(conf, args):
 def create_shell_permutations(conf, args):
 
     # get simulation list
-    simslist_all, parslist_all, shell_info_all = utils_cosmogrid.get_simulations_list(set_type='all')
+    simslist_all, parslist_all, shellinfo_all = utils_cosmogrid.get_baryonified_simulations_list(conf, set_type='all')
+    LOGGER.info(f'loaded {len(parslist_all)} parameters and {len(simslist_all)} simulations')
     parslist_all = utils_arrays.add_cols(parslist_all, names=['row_id_parslist:i4'], data=np.arange(len(parslist_all)))
 
 

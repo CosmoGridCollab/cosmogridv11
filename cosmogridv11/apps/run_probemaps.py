@@ -66,12 +66,13 @@ def resources(args):
     if type(args) is list:
         args = setup(args)
     
-    res = {'main_nsimult': 400,
+    res = {'main_nsimult': 500,
            'main_memory':16000,
-           'main_time_per_index':4, # hours
+           'main_time_per_index':8, # hours
            'main_scratch':int(2000*args.num_maps_per_index),
            'merge_memory':64000,
            'merge_time':24,
+           'pass': {'constraint': 'cpu', 'account': 'des', 'qos': 'shared'}
            } # perlmutter
 
     if args.largemem:
@@ -85,7 +86,7 @@ def resources(args):
         
         if os.environ['CLUSTER_NAME'] == 'perlmutter':
             res['pass'] = {'constraint': 'cpu', 'account': 'des', 'qos': 'shared'}
-            res['main_nsimult'] = 2000
+            res['main_nsimult'] = 200
 
         if os.environ['CLUSTER_NAME'] == 'euler':
             res['main_nsimult'] = 400
@@ -109,7 +110,6 @@ def main(indices, args):
         todolist_all = utils_cosmogrid.load_permutations_list(conf)
     else:
         todolist_all = utils_cosmogrid.get_simulations_list(set_type='all')[0]
-
 
     # change dir to temp
     tmp_dir = os.environ['TMPDIR'] if 'TMPDIR' in os.environ else os.getcwd()
@@ -191,7 +191,9 @@ def project_permuted_sims(index, args, conf):
 
     # load parameter list
     permlist_all = utils_cosmogrid.load_permutations_list(conf)
-    simslist_all, parslist_all, shell_info_all = utils_cosmogrid.get_simulations_list(set_type='all')
+    simslist_all, parslist_all, shell_info_all = utils_cosmogrid.get_baryonified_simulations_list(conf, set_type='all')
+    LOGGER.info(f'loaded {len(parslist_all)} parameters and {len(simslist_all)} simulations')
+    # simslist_all, parslist_all, shell_info_all = utils_cosmogrid.get_simulations_list(set_type='all')
 
     # index calculations
     perm_current = permlist_all[index]
@@ -218,14 +220,13 @@ def project_permuted_sims(index, args, conf):
 
     # KERNELS
 
-    nz_info, w_shell, cosmo = get_probe_kernels(nz_info, 
-                                                params=params_current, 
-                                                perm=perm_current, 
-                                                shellinfo=shellinfo_current, 
-                                                nside_out=int(conf['baryonification']['nside_out']), 
-                                                redshift_error_method=conf['redshift_error_method'], 
-                                                ept_smoothing_sigma=conf['projection']['ept_smoothing_sigma'],
-                                                test=args.test)
+    nz_info, w_shell = get_probe_kernels(nz_info, 
+                                         params=params_current, 
+                                         perm=perm_current, 
+                                         shellinfo=shellinfo_current, 
+                                         nside_out=int(conf['baryonification']['nside_out']), 
+                                         redshift_error_method=conf['redshift_error_method'], 
+                                         test=args.test)
 
     # SHELL GROUPS
 
@@ -239,7 +240,7 @@ def project_permuted_sims(index, args, conf):
     # PROJECTED MAPS
 
     # files_maps, filename_kernels = project_single_permuted_sim(conf, args, filepath_perm_index, params_current, id_perm=index_perm, parslist_all=parslist_all)
-    files_variants = project_single_permuted_sim(nz_info, w_shell, perms_info, shell_groups, cosmo,
+    files_variants = project_single_permuted_sim(nz_info, w_shell, perms_info, shell_groups,
                                                  dirpath_out=dirname_out,
                                                  conf=conf, 
                                                  sim_params=params_current,
@@ -248,11 +249,8 @@ def project_permuted_sims(index, args, conf):
 
     return files_variants
 
-def check_smoothing_needed(conf):
 
-    return np.any(np.array([nzi['probes'] for nzi in conf['redshifts_nz']])=='dg2')
-
-def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_groups, cosmo, dirpath_out, conf, sim_params, seed_highz, parslist_all):
+def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_groups, dirpath_out, conf, sim_params, seed_highz, parslist_all):
         
     # report
     LOGGER.info(f"=================>  path_par={sim_params['path_par']}")
@@ -270,7 +268,7 @@ def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_
         for i, id_sim in enumerate(perms_info['id_sim']):
             path_sim = utils_cosmogrid.get_sims_path(sim_params, id_sim=perms_info['id_sim'][i])
             path_sim = os.path.join(path_sim, '', filename_shells)
-            path_sim = path_sim.split('raw')[1].lstrip('/')
+            path_sim = path_sim.split('CosmoGrid/bary/')[1]
             path_sim = './' + path_sim
             paths_shells.append(path_sim)
 
@@ -283,8 +281,6 @@ def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_
         # loadd all the shells from different simulations according to the shell group permutation index
         shells_perm = {}
         success = True
-
-
         for i, id_sim in enumerate(perms_info['id_sim']):
 
             # load shells from the right file and select the shell needed
@@ -292,7 +288,7 @@ def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_
             path_sim = utils_cosmogrid.get_sims_path(sim_params, id_sim=perms_info['id_sim'][i])
 
             try:
-                shells =  utils_maps.load_v11_shells(path_shells_local[i], variant, smoothing_arcmin=cosmo.ept_smoothing_arcmin)
+                shells =  utils_maps.load_v11_shells(path_shells_local[i], variant)
 
             except NoFileException as err:
                 LOGGER.error(f'failed to load shells, err={err}')
@@ -336,10 +332,13 @@ def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_
         # add high redshift shell using Gaussian Random Field from stored cls
         probe_maps = utils_projection.add_highest_redshift_shell(probe_maps, probe_kernels, sim_params, parslist_all, seed=seed_highz)
 
+        # cell check
+        probe_cells = check_cls_for_probes(probe_maps, probe_kernels, sim_params)    
+
         # output files and store
         filepath_out = get_filepath_projected_maps(dirpath_out, variant)
         LOGGER.info('storing maps')
-        utils_maps.store_probe_maps(filepath_out, probe_maps, survey_mask=conf['projection']['survey_mask'], mode='w')
+        utils_maps.store_probe_maps(filepath_out, probe_maps, probe_cells=probe_cells, survey_mask=conf['projection']['survey_mask'], mode='w')
         LOGGER.info('storing kernels')
         utils_projection.store_probe_kernels(filepath_out, probe_kernels, shell_weights, mode='a')
         LOGGER.info('storing permutation indices')
@@ -491,7 +490,7 @@ def check_cls_for_probes(probe_maps, nz_info, params, plot=False):
 
 
 
-def get_probe_kernels(nz_info, params, shellinfo, nside_out, perm=None, redshift_error_method='fishbacher', ept_smoothing_sigma=False, test=False):
+def get_probe_kernels(nz_info, params, shellinfo, nside_out, perm=None, redshift_error_method='fishbacher', test=False):
 
     from cosmogridv1 import utils_redshift, utils_projection
 
@@ -549,16 +548,8 @@ def get_probe_kernels(nz_info, params, shellinfo, nside_out, perm=None, redshift
 
             # main magic: project probes
             utils_projection.probe_kernel_funcs[probe](sample, shellinfo, astropy_cosmo, sim_params, kw_ufalcon, test=test)
-
-    # add smoothing scales
-    if ept_smoothing_sigma is not None:
-        z_mid = (shellinfo['lower_z'] + shellinfo['upper_z'])/2.
-        from astropy import units
-        smoothing_mpc = ept_smoothing_sigma * units.Mpc / astropy_cosmo.h
-        astropy_cosmo.ept_smoothing_arcmin = smoothing_mpc / astropy_cosmo.kpc_comoving_per_arcmin(z_mid).to(units.Mpc/units.arcmin)
-
     
-    return nz_info, w_shell, astropy_cosmo
+    return nz_info, w_shell
 
 
 def get_shell_permutations(params, shellinfo, n_sims_use, n_max_replicas, seed, test=False):
@@ -590,13 +581,13 @@ def missing(indices, args):
 
     if conf['projection']['shell_perms'] == True:
         permlist_all = utils_cosmogrid.load_permutations_list(conf)
-        simslist_all, parslist_all, shell_info_all = utils_cosmogrid.get_simulations_list(set_type='all')
+        simslist_all, parslist_all, shell_info_all = utils_cosmogrid.get_baryonified_simulations_list(conf, set_type='all')
 
     list_missing = []
 
     # loop over sims 
 
-    for index in LOGGER.progressbar(indices, desc='checking for missing results', at_level='info'):     
+    for index in (pbar := LOGGER.progressbar(indices, desc='checking for missing results', at_level='info')):     
 
         if conf['projection']['shell_perms'] == False:
 
@@ -623,8 +614,9 @@ def missing(indices, args):
 
                     if not os.path.isfile(filepath_out):
 
-                        LOGGER.info(f'{perm_id: 6d} /{len(indices)*args.num_maps_per_index} file missing: {filepath_out}')
+                        LOGGER.debug(f'{perm_id: 6d} /{len(indices)*args.num_maps_per_index} file missing: {filepath_out}')
                         list_missing.append(index)
+                        pbar.set_description_str(f"checking for missing results, found {len(list_missing)} missing")
 
                     else:
 

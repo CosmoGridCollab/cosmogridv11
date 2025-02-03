@@ -86,7 +86,7 @@ def get_baryonified_simulations_list(conf, set_type='all'):
     conf['paths'].setdefault('metainfo_bary', 'Fluri+2022')
     if conf['paths']['metainfo_bary'] == 'Fluri+2022':
 
-        LOGGER.warning('field *metainfo_bary* missing from config/paths, using CosmoGridV1 default baryoification')
+        LOGGER.warning('using CosmoGridV1 default baryonification from Fluri+2022')
         dir_resources = os.path.join(os.path.dirname(__file__), 'resources')
         conf['paths']['metainfo_bary'] = os.path.join(dir_resources, 'CosmoGridV11_bary_Fluri+2022_metainfo.h5')
 
