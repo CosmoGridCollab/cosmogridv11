@@ -1,0 +1,51 @@
+tag: v11
+
+
+paths:
+  cosmogrid_root: tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/raw
+  cosmogrid_halos: tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11/CosmoGrid/bary/
+  cosmogrid_bary: tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11/CosmoGrid/bary/
+  metainfo_bary: Fluri+2022
+  redshift_perturbations_list: /cluster/work/refregier/tomaszk/projects/220708_cosmogrid_paper/011_quadbias_astropaint/v11desy3/metainfo_perms.npy
+
+projection:
+  shell_perms: True
+  shell_perms_seed: 424242
+  highz_synfast_seed: 3212312
+  n_max_shells: 69
+  n_steps: 140
+  n_max_replicas: 7
+  n_max_sims_use: inf
+  n_perms_per_cosmo:
+    fiducial: 1000
+    grid: 20
+    benchmarks: 20
+  survey_mask: False
+  # survey_mask: $MODULE_DIR/resources/survey_masks/DESY3_allpixels_nside1024.h5
+
+analysis_variants:
+  - v11dmo
+  - v11dmb
+
+
+baryonification:
+  tag: v11
+  nside_out: 1024
+  new_bary_params:
+    Mc: # uniform in log10 space
+      grid: [12., 15.] # min max, originally [12., 15.]
+      fiducial: [13.82, -0.1, +0.1] # central δ- δ+, originally [13.82, -0.1, +0.1] 
+    nu:
+      grid:  [-2., 2.] # min max, originally [-2., 2.]
+      fiducial: [0, -0.1, +0.1] # central delta, originally [0, -0.1, +0.1]
+    eta_cga: 
+      fixed: 0.6
+    eta_tot: 
+      fixed: 0.32
+    mu: 
+      fixed: 0.21
+    thco: 
+      fixed: 0.1
+    thej: 
+      fixed: 4.0
+
