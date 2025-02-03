@@ -62,13 +62,10 @@ The contents and structure are similar.
 | `shell_info` | shell info for *baryonified* parameters, matching the paths in `parameters`.  |
 
 
-# Below will be replaced
-
-
-
 ### The profiled halos catalog, `profiled_halos_v11.h5`
 
-
+The halo catalog is created using snapshots, and then replicated to cover the entire lightcone. 
+Therefore some halos occur at multiple locations on the sky.
 
 | dataset | content |
 | ------------- | ------------- | 
@@ -76,9 +73,19 @@ The contents and structure are similar.
 | `shell{:03d}/halo_props` | 3D positions of halos, number of rows corresponds to the total number of *unique* halos in the lightcone, no replication. Match with `halo_pos` by `ID`. | 
 
 
+#### Content of `halo_pos`
+
+| field | content |
+| ------------- | ------------- | 
+| `uid` | Unique halo id |
+| `x`, `y`, `z` | 3D position in Mpc/h |
+| `shell_id` | Id of the shell the halo belongs to |
+| `halo_buffer` | If it is a halo belonging to a neighbour shell, +1/-1 for halo from a lower and higher redshift shells, respectively |
 
 
 
+
+# Below will be replaced
 
 
 
