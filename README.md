@@ -105,6 +105,24 @@ See function `utils_maps.load_v11_shells` for instructions how to load this file
 | `diff_shell_vals/shell{:03d}` | values of pixels that are different in the baryonified shells  |
 
 
+## The projected maps files
+
+Files in `simulation_set/cosmology/permutation/projected_probes_maps_v11dmb.h5` contain the projected maps. Here the tag `v11dmb` was used.
+The power spectra for all probes and samples are measured (`cell_ccl`). 
+PyCCL theory was calculated (`cell_ccl`).
+Additionally, a Synfast map was created with the theory Cell and its power spectrum was measured (`cell_map_ccl`).
+This allows to compare the Cell CosmoGrid with PyCCL accounting for the pixelization.
+
+| dataset | content |
+| ------------- | ------------- | 
+| `kernel/probe/sample` | Projection kernel for a given probe and sample. Array of size Nx2, where N is the number of entries in the n(z) provided in config. Columns are `z`, `kernel value`. |
+| `map/probe/sample` | Projected map for a given probe and sample. Vector corresponding to the given nside.  |
+| `nz/sample` | Redshift distribution for each sample, same array dimensions as in the kernel. |
+| `perms_info` | Permutation specifications for these maps. See http://www.cosmogrid.ai/data_docs/. |
+| `shell_groups/{i:d}` | A list of shells that created each group `i`, containing the rows from `shell_info`. |
+| `cell/probe/sample` | Power spectra of the maps. The columns are: `ell`, `cell_ccl`, `cell_map_ccl`, `cell_map`. See description above. |
+
+
 
 
 ## CosmoGridV11: LSST-DESC Y1 Trial
