@@ -51,6 +51,10 @@ Downstream processig for applying survey masks, noise, systematics, etc, is not 
 
 ### The baronification parameter table, `CosmoGridV1_bary_{tag}_metainfo.h5`
 
+This table is extending the `CosmoGridV1_metainfo.h5` table to include baryonified simulations.
+See documentation on http://www.cosmogrid.ai/data_docs/.
+The contents and structure are similar.
+
 | dataset | content |
 | ------------- | ------------- | 
 | `parameters/all` | baryonification parameters for all unique parameter sets, extending the cosmology metainfo parameters, number of rows corresponds to the number of *baryonified* parameter sets. Datasets `grid`, `fiducial` and `benchmark` contain the same but split into dataset types. | 
