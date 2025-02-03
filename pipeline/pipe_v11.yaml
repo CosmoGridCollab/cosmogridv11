@@ -1,7 +1,7 @@
 #####################################
 #####################################
 ##
-## Make the v11 maps
+## Example CosmoGridV11 pipeline
 ##
 #####################################
 #####################################
@@ -9,32 +9,32 @@
 # test 
 
 - name: //test_v11_haloprof
-  cmd: esub cosmogridv1.apps.run_haloops profile_halos     --config=config_v11.yaml   --dir_out=v11 --tasks="0" --verbosity=debug --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+  cmd: esub cosmogridv1.apps.run_haloops profile_halos     --config=config_v11.yaml   --dir_out=v11 --tasks="0" --verbosity=debug 
 
-- name: //test_v11_newbary
-  cmd: esub cosmogridv1.apps.run_paramtables baryon_params --config=config_v11.yaml   --dir_out=v11 --verbosity=debug --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+- name: //test_v11_paramtable # create baryon parameter table in the new format
+  cmd: esub cosmogridv1.apps.run_paramtables baryon_params --config=config_v11.yaml   --dir_out=v11 --verbosity=debug 
 
-- name: //test_v11_baryonify
+- name: //test_v11_baryonify # baryonify - here only the benchmarks in indices 3400-3407
   cmd: esub cosmogridv1.apps.run_haloops baryonify_shells  --config=config_v11.yaml   --dir_out=v11 --tasks="3400>3407" --n_cores=7 --mode=jobarray --verbosity=info
 
 # full run fiducial
 
-- name: //v11_fid_haloprof
-  cmd: esub cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+- name: v11_fid_haloprof # fiducial cosmology + deltas
+  cmd: esub cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info 
 
-- name: //v11_fid_baryonify
-  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+- name: v11_fid_baryonify
+  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info 
 
 # run the grid
 
-- name: //v11_grid_baryonify1
-  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="3400>12150" --n_cores=8750 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+- name: v11_grid_baryonify1
+  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="3400>12150" --n_cores=8750 --mode=jobarray --verbosity=info
 
-- name: //v11_grid_baryonify2
-  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="12150>20900" --n_cores=8750 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+- name: v11_grid_baryonify2
+  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="12150>20900" --n_cores=8750 --mode=jobarray --verbosity=info
 
 - name: v11_grid_baryonify_rerun1
-  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks=rerun1_grid.yaml --n_cores=118 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks=rerun1_grid.yaml --n_cores=118 --mode=jobarray --verbosity=info 
 
 
 
