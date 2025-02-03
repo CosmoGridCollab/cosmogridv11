@@ -8,13 +8,18 @@
 
 # test 
 
-- name: //test_v11_haloprof
+- name: v11_haloprof
   cmd: esub cosmogridv1.apps.run_haloops profile_halos     --config=config_v11.yaml   --dir_out=v11 --tasks="0" --verbosity=debug 
 
-- name: //test_v11_paramtable # create baryon parameter table in the new format
+- name:  v11_bary_paramtable # create baryon parameter table in the new format
   cmd: esub cosmogridv1.apps.run_paramtables baryon_params --config=config_v11.yaml   --dir_out=v11 --verbosity=debug 
 
-- name: //test_v11_baryonify # baryonify - here only the benchmarks in indices 3400-3407
+# benchmarks
+
+- name: v11_bench_haloprof # benchmark halo profiling
+  cmd: esub cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --tasks="3400>3407" --n_cores=7 --mode=jobarray --verbosity=info 
+
+- name: v11_bench_baryonify # baryonify - here only the benchmarks in indices 3400-3407
   cmd: esub cosmogridv1.apps.run_haloops baryonify_shells  --config=config_v11.yaml   --dir_out=v11 --tasks="3400>3407" --n_cores=7 --mode=jobarray --verbosity=info
 
 # full run fiducial
@@ -30,6 +35,10 @@
 - name: v11_grid_haloprof # grid cosmologies + deltas halo profiling
   cmd: esub cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --tasks="3400>20900" --n_cores=17000 --mode=jobarray --verbosity=info 
 
-- name: v11_grid_baryonify # halo profile full grid
+- name: v11_grid_baryonify # baryonify profile full grid
   cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="3400>20900" --n_cores=17000 --mode=jobarray --verbosity=info
 
+# redshift perturbations
+
+- name: //vpermtable
+  cmd: esub cosmogridv1.apps.run_paramtables shell_permutations --config=config_v11desy3.yaml --dir_out=v11desy3/   
