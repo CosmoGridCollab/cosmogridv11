@@ -1,204 +1,60 @@
 #####################################
 #####################################
 ##
-## Make the v11 maps
+## Example CosmoGridV11 pipeline
 ##
 #####################################
 #####################################
 
 # test 
 
-- name: //test_v11_haloprof
-  cmd: esub cosmogridv1.apps.run_haloops profile_halos     --config=config_v11.yaml   --dir_out=v11 --tasks="0" --verbosity=debug --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+- name: v11_haloprof
+  cmd: esub cosmogridv1.apps.run_haloops profile_halos     --config=config_v11.yaml   --dir_out=v11 --tasks="0" --verbosity=debug 
 
-- name: //test_v11_newbary
-  cmd: esub cosmogridv1.apps.run_paramtables baryon_params --config=config_v11.yaml   --dir_out=v11 --verbosity=debug --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+- name:  v11_bary_paramtable # create baryon parameter table in the new format
+  cmd: esub cosmogridv1.apps.run_paramtables baryon_params --config=config_v11.yaml   --dir_out=v11 --verbosity=debug 
 
-- name: //test_v11_baryonify
+# benchmarks
+
+- name: v11_bench_haloprof # benchmark halo profiling
+  cmd: esub cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --tasks="3400>3407" --n_cores=7 --mode=jobarray --verbosity=info 
+
+- name: v11_bench_baryonify # baryonify - here only the benchmarks in indices 3400-3407
   cmd: esub cosmogridv1.apps.run_haloops baryonify_shells  --config=config_v11.yaml   --dir_out=v11 --tasks="3400>3407" --n_cores=7 --mode=jobarray --verbosity=info
 
 # full run fiducial
 
-- name: //v11_fid_haloprof
-  cmd: esub cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+- name: v11_fid_haloprof # fiducial cosmology + deltas halo profiling
+  cmd: esub cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info 
 
-- name: //v11_fid_baryonify
-  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+- name: v11_fid_baryonify # fiducial cosmology + deltas shell baryonification
+  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info 
 
 # run the grid
 
-- name: //v11_grid_baryonify1
-  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="3400>12150" --n_cores=8750 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+- name: v11_grid_haloprof # grid cosmologies + deltas halo profiling
+  cmd: esub cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --tasks="3400>20900" --n_cores=17000 --mode=jobarray --verbosity=info 
 
-- name: //v11_grid_baryonify2
-  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="12150>20900" --n_cores=8750 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+- name: v11_grid_baryonify # baryonify profile full grid
+  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="3400>20900" --n_cores=17000 --mode=jobarray --verbosity=info
 
-- name: v11_grid_baryonify_rerun1
-  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks=rerun1_grid.yaml --n_cores=118 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11
+# redshift perturbations
 
+- name: v11desy3_shell_permtable
+  cmd: esub cosmogridv1.apps.run_paramtables shell_permutations --config=config_v11desy3.yaml   --dir_out=v11desy3 --verbosity=info
 
-
-
-
-
-# test haloshells dg2
-
-
-
-# make stage3_hires shells for the entire cosmogrid
-
-# - name: //ker_stage3_hires
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_create_probe_kernels.py --config=config_hires.yaml --dir_out=CosmoGrid/stage3_hires --tasks="0>2521" --n_cores=2521 --verbosity=info --mode=jobarray
-
-# - name: //map_stage3_hires_fiducial
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/stage3_hires --par_ids="0:17" --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info
-#   dep: ker_stage3_hires
-
-# - name: //map_stage3_hires_grid
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/stage3_hires --par_ids="17:2517" --tasks="0>17500" --n_cores=17500 --mode=jobarray --verbosity=info
-#   dep: ker_stage3_hires
-
-# - name: //map_stage3_hires_benchmark
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/stage3_hires --par_ids="2517:2521" --tasks="0>28" --n_cores=28 --mode=jobarray --verbosity=info
-#   dep: ker_stage3_hires
-
-
-# # test
-
-# - name: //ker_stage3_hires
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_create_probe_kernels.py --config=config_hires.yaml --dir_out=CosmoGrid/stage3_hires --tasks="0" --verbosity=info
-
-# - name: //map_stage3_hires_fiducial
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/stage3_hires --par_ids="0" --tasks="0" --verbosity=info
-#   dep: ker_stage3_hires
-
-# - name: //map_stage3_hires_grid
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/stage3_hires --par_ids="17" --tasks="0" --verbosity=info
-#   dep: ker_stage3_hires
-
-# - name: //map_stage3_hires_benchmark
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/stage3_hires --par_ids="2517" --tasks="0" --verbosity=info
-#   dep: ker_stage3_hires
   
-# - name: //test_baryonification_shelldisp_part6
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_out=bary_hires --tasks="0" --n_cores=1 --mode=jobarray --verbosity=info #--dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/experiments/tomaszk/projects/220422_cosmogrid_paper/005_cosmogridv11/bary_nside1024/
+# project shells
 
-#     # baryonification 
-
-# - name: //test_baryonification_haloprof_part1
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=bary_nside1024 --tasks="0>10000" --n_cores=10000 --mode=jobarray --verbosity=warning 
-
-# - name: //test_baryonification_haloprof_part2
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=bary_nside1024 --tasks="10000>20000" --n_cores=10000 --mode=jobarray --verbosity=warning 
-
-# - name: //test_baryonification_haloprof_part3
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=bary_nside1024 --tasks="20000>20920" --n_cores=920 --mode=jobarray --verbosity=warning 
-
-
-# - name: //test_baryonification_haloprof
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=baryonification_test --tasks="0" --mode=jobarray --verbosity=info 
+- name: proj_bench
+  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml      --dir_out=v11desy3    --num_maps_per_index=10  --tasks="67079"     --verbosity=info --largemem --mode=jobarray --n_cores=1
   
-# - name: //test_baryonification_shelldispl
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_out=baryonification_test --tasks="0" --mode=jobarray --verbosity=info #--dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/experiments/tomaszk/projects/220422_cosmogrid_paper/005_cosmogridv11/barionified1024/
+- name: proj_fid1
+  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml      --dir_out=v11desy3    --num_maps_per_index=10 --tasks="0>1700"     --verbosity=info --mode=jobarray --n_cores=1700
 
+- name: proj_fid1_dmo
+  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3_dmo.yaml  --dir_out=v11desy3    --num_maps_per_index=10 --tasks="0>1700"     --verbosity=info --mode=jobarray --n_cores=1700
 
-#####################################
-#####################################
-##
-## Main run for halo profiling
-##
-#####################################
-#####################################
-
-
-# - name: //missing_baryonification_haloprof
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=bary_hires --tasks="0>20920" --n_cores=1 --function=missing --mode=run --verbosity=info 
-
-# - name: //baryonification_haloprof_rerun1
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=bary_hires --n_cores=95 --function=main --mode=jobarray --verbosity=warning --tasks="2721, 2722, 2723, 2724, 2725, 2726, 2727, 2728, 2729, 2730, 2731, 2732, 2733, 2734, 2735, 3484, 3485, 3486, 3487, 3488, 3489, 3490, 3759, 4443, 4444, 4445, 4446, 4447, 4448, 4449, 4557, 4558, 4559, 4560, 4561, 4562, 5344, 5430, 5431, 5432, 5433, 5434, 5435, 5436, 5471, 5765, 5766, 5767, 5906, 5907, 5908, 5909, 5910, 5911, 5912, 6453, 6454, 6455, 6464, 7054, 7055, 7056, 7057, 7058, 7059, 7060, 7383, 7384, 7385, 7386, 7387, 7388, 7389, 7495, 7496, 7497, 7498, 7499, 7500, 7501, 8944, 8945, 8946, 8947, 8948, 8949, 8950, 9273, 9630, 9631, 9632, 9633, 9634, 9635, 9636"
-
-# - name: //baryonification_haloprof_rerun2
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=bary_hires --n_cores=699 --function=main --mode=jobarray --verbosity=warning --tasks="10385, 10608, 10832, 10871, 10886, 10943, 10973, 10993, 11020, 11131, 11268, 11269, 11332, 11333, 11411, 11412, 11515, 11516, 11562, 11563, 11635, 11703, 11704, 11707, 11736, 11737, 11745, 11764, 11765, 11768, 11778, 11779, 11780, 11817, 11888, 11889, 11905, 11906, 11911, 11912, 11925, 11926, 11927, 11938, 11939, 11941, 11942, 11943, 11944, 11945, 11981, 11982, 11983, 11986, 11987, 11992, 11993, 11994, 12070, 12071, 12072, 12073, 12113, 12114, 12120, 12121, 12122, 12129, 12130, 12131, 12132, 12136, 12137, 12138, 12317, 12318, 12319, 12320, 12321, 12322, 12323, 12324, 12325, 12326, 12327, 12328, 12329, 12330, 12331, 12332, 12333, 12334, 12335, 12336, 12337, 12338, 12339, 12340, 12341, 12342, 12343, 12344, 12345, 12346, 12347, 12348, 12349, 12350, 12351, 12352, 12353, 12354, 12355, 12356, 12357, 12358, 12359, 12360, 12361, 12362, 12363, 12364, 12365, 12366, 12370, 12371, 12372, 12373, 12374, 12375, 12376, 12377, 12378, 12379, 12380, 12381, 12382, 12383, 12384, 12385, 12386, 12387, 12388, 12389, 12390, 12391, 12392, 12393, 12394, 12395, 12396, 12397, 12398, 12399, 12400, 12401, 12402, 12403, 12404, 12405, 12406, 12407, 12408, 12409, 12410, 12411, 12412, 12413, 12414, 12415, 12416, 12417, 12418, 12419, 12420, 12421, 12422, 12423, 12424, 12425, 12426, 12427, 12428, 12429, 12430, 12431, 12432, 12433, 12434, 12435, 12436, 12437, 12438, 12439, 12440, 12441, 12442, 12443, 12444, 12445, 12446, 12447, 12448, 12449, 12450, 12451, 12452, 12453, 12454, 12455, 12456, 12457, 12458, 12459, 12460, 12461, 12462, 12463, 12464, 12465, 12466, 12467, 12468, 12469, 12470, 12471, 12472, 12473, 12474, 12475, 12476, 12477, 12478, 12479, 12480, 12481, 12482, 12483, 12484, 12485, 12486, 12487, 12488, 12489, 12490, 12491, 12492, 12509, 12510, 12511, 12512, 12513, 12515, 12516, 12517, 12521, 12522, 12523, 12524, 12525, 12526, 12527, 12528, 12529, 12530, 12531, 12532, 12533, 12534, 12535, 12536, 12538, 12539, 12540, 12541, 12542, 12543, 12544, 12545, 12546, 12547, 12548, 12550, 12551, 12552, 12553, 12554, 12555, 12556, 12557, 12558, 12559, 12561, 12562, 12563, 12564, 12565, 12567, 12568, 12569, 12570, 12571, 12572, 12573, 12574, 12575, 12576, 12577, 12578, 12579, 12580, 12581, 12582, 12583, 12584, 12585, 12586, 12587, 12588, 12589, 12590, 12615, 12617, 12618, 12619, 12620, 12624, 12626, 12627, 12628, 12629, 12630, 12632, 12633, 12634, 12635, 12636, 12637, 12638, 12639, 12640, 12641, 12642, 12643, 12644, 12645, 12646, 12647, 12648, 12649, 12650, 12651, 12652, 12654, 12655, 12656, 12658, 12659, 12660, 12661, 12663, 12664, 12665, 12666, 12667, 12668, 12670, 12671, 12673, 12675, 12676, 12677, 12679, 12680, 12681, 12682, 12683, 12684, 12685, 12686, 12687, 12702, 12703, 12705, 12706, 12707, 12709, 12710, 12711, 12712, 12714, 12716, 12718, 12719, 12720, 12722, 12724, 12725, 12726, 12728, 12729, 12730, 12734, 12735, 12736, 12737, 12738, 12739, 12740, 12741, 12742, 12743, 12744, 12745, 12746, 12747, 12748, 12749, 12750, 12751, 12752, 12753, 12754, 12755, 12757, 12758, 12759, 12760, 12761, 12762, 12763, 12764, 12767, 12768, 12769, 12770, 12771, 12772, 12774, 12775, 12776, 12778, 12779, 12780, 12781, 12782, 12783, 12784, 12785, 12786, 12790, 12791, 12792, 12793, 12794, 12795, 12796, 12797, 12798, 12799, 12800, 12801, 12803, 12804, 12805, 12806, 12807, 12810, 12811, 12812, 12813, 12814, 12815, 12816, 12817, 12818, 12819, 12820, 12822, 12823, 12824, 12826, 12827, 12828, 12829, 12830, 12831, 12832, 12833, 12834, 12835, 12836, 12840, 12841, 12842, 12843, 12844, 12845, 12846, 12847, 12848, 12849, 12851, 12852, 12853, 12854, 12855, 12857, 12858, 12860, 12861, 12862, 12863, 12866, 12867, 12870, 12872, 12875, 12876, 12877, 12878, 12879, 12880, 12881, 12882, 12884, 12887, 12888, 12889, 12890, 12891, 12892, 12893, 12895, 12897, 12898, 12899, 12901, 12902, 12903, 12904, 12905, 12906, 12907, 12908, 12909, 12910, 12911, 12912, 12913, 12914, 12916, 12917, 12925, 12938, 12942, 12944, 12951, 12955, 12956, 12957, 12964, 12965, 12966, 12967, 12968, 12970, 12971, 12972, 12973, 12974, 12976, 12977, 12978, 12981, 12982, 12983, 12984, 12985, 12986, 12990, 12991, 12994, 12995, 12996, 12997, 12998, 12999, 13000, 13001, 13003, 13004, 13005, 13006, 13007, 13008, 13009, 13010, 13011, 13012, 13013, 13014, 13015, 13016, 13023, 13024, 13025, 13026, 13027, 13028, 13030, 13032, 13033, 15463, 15464, 15469, 18271, 18272, 18273, 18274, 18275, 18276, 18277, 18278, 18279, 18280, 18281, 18282, 18283, 18284, 18285, 18286, 18359, 18364, 18365, 18366, 18367, 18368, 18374, 18375, 18377, 18435, 19383, 19384, 19392, 19393, 19394, 19395, 19415, 19416, 19417, 19418, 19424, 19425, 19426, 19427, 19428, 19439, 19440, 19441, 19442, 19443, 19468, 19469, 19477, 19478, 19485, 19486, 19487, 19488, 19489, 19490, 19492, 19513, 19519, 19520, 19521, 19522, 19523, 19524, 19558, 19559, 19560, 19561, 19562, 19563, 19573, 19579, 19588, 19589, 19590, 19591, 19592, 19613, 19614, 19615, 19616, 19617, 19618"
-
-# - name: //baryonification_haloprof_rerun3
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=bary_hires --n_cores=16 --function=main --mode=jobarray --verbosity=warning --tasks="20606,20900,20901,20902,20903,20904,20910,20911,20912,20913,20914,20915,20916,20917,20918,20919"
-
-# - name: //baryonification_haloprof_rerun4
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=bary_hires --n_cores=2000 --function=main --mode=jobarray --verbosity=warning --tasks="200>2200"
-
-# - name: //baryonification_haloprof_rerun5
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=bary_hires --n_cores=155 --function=main --mode=jobarray --verbosity=info --tasks="210, 211, 212, 213, 214, 215, 216, 263, 264, 265, 266, 267, 268, 269, 305, 306, 307, 308, 309, 310, 311, 339, 340, 341, 342, 343, 344, 346, 381, 382, 383, 384, 385, 386, 387, 388, 418, 419, 420, 445, 446, 447, 448, 449, 452, 495, 496, 497, 498, 499, 500, 501, 502, 528, 529, 530, 531, 532, 533, 534, 535, 537, 538, 539, 540, 541, 542, 559, 560, 561, 562, 563, 564, 565, 566, 567, 568, 569, 570, 571, 572, 573, 574, 598, 599, 600, 601, 602, 603, 604, 605, 606, 608, 656, 657, 747, 780, 819, 820, 821, 834, 835, 836, 838, 872, 873, 874, 876, 898, 899, 900, 931, 932, 933, 934, 935, 937, 938, 939, 940, 941, 942, 943, 944, 959, 960, 961, 962, 963, 964, 965, 1408, 1418, 1437, 1459, 1490, 1519, 1555, 1597, 1643, 20900, 20901, 20902, 20903, 20904, 20910, 20911, 20912, 20913, 20914, 20915, 20916, 20917, 20918, 20919"
-
-# - name: //baryonification_haloprof_rerun6
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=bary_hires --n_cores=15 --function=main --mode=jobarray --verbosity=info --long --tasks="20900, 20901, 20902, 20903, 20904, 20910, 20911, 20912, 20913, 20914, 20915, 20916, 20917, 20918, 20919"
-
-# - name: //baryonification_haloprof_rerun7
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=bary_hires --n_cores=5 --function=main --mode=jobarray --verbosity=info --long --tasks="20910, 20911, 20912, 20913, 20914"
-
-# - name: //baryonification_haloprof_deltabary
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py profile_halos --config=config_hires.yaml   --dir_out=bary_hires --n_cores=800 --function=main --tasks="1400>2200" --mode=jobarray --verbosity=info
-
-#####################################
-#####################################
-##
-## Main run for shell displacements
-##
-#####################################
-#####################################
-
-# - name: //baryonification_shelldisp_fiducial
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_out=bary_hires --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/experiments/tomaszk/projects/220422_cosmogrid_paper/005_cosmogridv11/bary_hires/
-
-# - name: //baryonification_shelldisp_grid1
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_out=bary_hires --tasks="3400>12150" --n_cores=8750 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/experiments/tomaszk/projects/220422_cosmogrid_paper/005_cosmogridv11/bary_hires/
-
-# - name: //baryonification_shelldisp_grid1_missing1
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_out=bary_hires --n_cores=759 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/experiments/tomaszk/projects/220422_cosmogrid_paper/005_cosmogridv11/bary_hires/ --tasks="3486, 3514, 3516, 3528, 3540, 3568, 3569, 3570, 3571, 3572, 3573, 3574, 3590, 3591, 3595, 3609, 3645, 3646, 3647, 3648, 3649, 3650, 3651, 3669, 3881, 3904, 3906, 3907, 3908, 3909, 3940, 3943, 3945, 3946, 3947, 3948, 3950, 3952, 3961, 3962, 3963, 3991, 4009, 4010, 4011, 4014, 4015, 4023, 4024, 4025, 4026, 4027, 4028, 4029, 4082, 4128, 4129, 4130, 4131, 4132, 4133, 4134, 4149, 4150, 4151, 4153, 4154, 4155, 4167, 4205, 4206, 4207, 4208, 4209, 4210, 4211, 4229, 4232, 4331, 4332, 4334, 4443, 4444, 4445, 4446, 4447, 4448, 4449, 4450, 4451, 4452, 4453, 4454, 4455, 4456, 4499, 4500, 4501, 4502, 4503, 4504, 4505, 4522, 4523, 4562, 4784, 4785, 4807, 4808, 4809, 4810, 4811, 4812, 4813, 4843, 4845, 4961, 4962, 4963, 4964, 4966, 4967, 4994, 5038, 5040, 5041, 5043, 5044, 5087, 5090, 5102, 5137, 5194, 5197, 5198, 5283, 5284, 5285, 5286, 5287, 5288, 5289, 5297, 5298, 5299, 5301, 5339, 5340, 5341, 5342, 5343, 5344, 5345, 5361, 5363, 5374, 5430, 5431, 5432, 5433, 5434, 5435, 5436, 5459, 5551, 5552, 5553, 5554, 5555, 5570, 5571, 5573, 5575, 5576, 5577, 5578, 5579, 5580, 5581, 5582, 5583, 5640, 5771, 5794, 5795, 5796, 5797, 5798, 5800, 5814, 5822, 5825, 5826, 5827, 5828, 5837, 5839, 5841, 5851, 5853, 5854, 5867, 5880, 5884, 5892, 5893, 5894, 5895, 5896, 5897, 5898, 6137, 6139, 6141, 6146, 6148, 6149, 6150, 6159, 6163, 6179, 6180, 6181, 6182, 6183, 6184, 6185, 6201, 6202, 6206, 6256, 6257, 6258, 6259, 6260, 6261, 6262, 6278, 6386, 6387, 6388, 6487, 6488, 6489, 6490, 6491, 6492, 6493, 6503, 6504, 6505, 6507, 6543, 6544, 6545, 6546, 6547, 6548, 6564, 6568, 6569, 6570, 6585, 6586, 6587, 6588, 6589, 6590, 6591, 6613, 6614, 6615, 6616, 6618, 6619, 6865, 6866, 6867, 6868, 6869, 6870, 6871, 6894, 6898, 6907, 6908, 6909, 6910, 6911, 6912, 6913, 6921, 6925, 7042, 7089, 7090, 7091, 7092, 7093, 7094, 7095, 7119, 7120, 7127, 7180, 7181, 7182, 7183, 7184, 7185, 7186, 7356, 7361, 7383, 7384, 7385, 7386, 7388, 7389, 7391, 7411, 7412, 7414, 7415, 7416, 7417, 7420, 7422, 7474, 7475, 7476, 7477, 7478, 7479, 7480, 7495, 7496, 7497, 7498, 7499, 7500, 7501, 7516, 7517, 7518, 7519, 7520, 7521, 7522, 7654, 7670, 7671, 7672, 7673, 7674, 7676, 7874, 7894, 7895, 7896, 7897, 7898, 7899, 7900, 7901, 7902, 7907, 7923, 7926, 7936, 7938, 7939, 7940, 7941, 7942, 7950, 7951, 7955, 7956, 8020, 8021, 8022, 8023, 8024, 8025, 8026, 8083, 8084, 8085, 8086, 8087, 8088, 8089, 8216, 8217, 8220, 8222, 8265, 8266, 8267, 8268, 8269, 8270, 8271, 8391, 8392, 8393, 8394, 8395, 8396, 8397, 8427, 8429, 8443, 8446, 8468, 8469, 8470, 8471, 8472, 8473, 8474, 8500, 8505, 8506, 8606, 8706, 8707, 8708, 8709, 8710, 8712, 8720, 8721, 8722, 8723, 8724, 8725, 8726, 8748, 8749, 8750, 8751, 8752, 8753, 8754, 8762, 8763, 8764, 8765, 8766, 8767, 8768, 8771, 8772, 8775, 8811, 8812, 8813, 8814, 8815, 8816, 8817, 8944, 8945, 8946, 8947, 8948, 8949, 8950, 9000, 9001, 9002, 9003, 9004, 9005, 9006, 9121, 9123, 9124, 9125, 9224, 9225, 9226, 9228, 9229, 9230, 9238, 9239, 9240, 9241, 9242, 9244, 9273, 9274, 9275, 9276, 9277, 9278, 9279, 9302, 9303, 9304, 9307, 9329, 9330, 9331, 9332, 9333, 9334, 9335, 9354, 9373, 9392, 9393, 9395, 9396, 9397, 9398, 9547, 9553, 9572, 9574, 9576, 9577, 9580, 9595, 9597, 9598, 9599, 9601, 9617, 9618, 9619, 9620, 9621, 9622, 9754, 9787, 9812, 9813, 9814, 9815, 9816, 9817, 9818, 9820, 9822, 9823, 9825, 9861, 9862, 9863, 9864, 9865, 9867, 9905, 10078, 10079, 10080, 10082, 10083, 10084, 10100, 10104, 10127, 10128, 10129, 10130, 10131, 10132, 10159, 10176, 10178, 10179, 10181, 10182, 10198, 10199, 10200, 10203, 10204, 10205, 10207, 10208, 10209, 10210, 10267, 10270, 10273, 10323, 10344, 10345, 10346, 10347, 10348, 10349, 10350, 10373, 10374, 10375, 10377, 10378, 10379, 10380, 10381, 10382, 10383, 10384, 10385, 10596, 10599, 10618, 10620, 10622, 10623, 10638, 10639, 10640, 10641, 10642, 10643, 10644, 10659, 10660, 10661, 10662, 10664, 10665, 10667, 10668, 10670, 10701, 10702, 10703, 10704, 10705, 10706, 10707, 10968, 10971, 10972, 10981, 10982, 10983, 10984, 10985, 10986, 10987, 11079, 11080, 11081, 11082, 11083, 11085, 11093, 11107, 11108, 11109, 11111, 11112, 11113, 11130, 11131, 11132, 11133, 11134, 11156, 11157, 11158, 11159, 11160, 11161, 11162, 11177, 11178, 11180, 11181, 11183, 11205, 11206, 11207, 11208, 11209, 11210, 11211, 11248, 11254, 11338, 11339, 11340, 11341, 11342, 11343, 11344, 11414, 11415, 11416, 11417, 11436, 11442, 11457, 11458, 11459, 11460, 11461, 11462, 11463, 11507, 11508, 11509, 11510, 11511, 11512, 11520, 11521, 11522, 11524, 11525, 11535, 11536, 11537, 11538, 11539, 11576, 11577, 11578, 11579, 11580, 11581, 11582, 11610, 11804, 11829, 11832, 11833, 11834, 11849, 11850, 11851, 11852, 11853, 11854, 11855, 11870, 11871, 11872, 11873, 11874, 11875, 11876, 11926, 11927, 11928, 11929, 11930, 11931, 11932, 11943"
-
-# - name: //baryonification_shelldisp_grid2
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_out=bary_hires --tasks="12150>20900" --n_cores=8750 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/experiments/tomaszk/projects/220422_cosmogrid_paper/005_cosmogridv11/bary_hires/
-
-# - name: //baryonification_shelldisp_grid1_missing2
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_out=bary_hires --n_cores=9 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/experiments/tomaszk/projects/220422_cosmogrid_paper/005_cosmogridv11/bary_hires/ --tasks="3354, 12212, 12801, 12802, 12803, 12804, 12805, 12806, 12807"
-
-# - name: //baryonification_shelldisp_grid1_missing3
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_out=bary_hires --n_cores=7 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/experiments/tomaszk/projects/220422_cosmogrid_paper/005_cosmogridv11/bary_hires/ --tasks="12801, 12802, 12803, 12804, 12805, 12806, 12807"
-
-# - name: //baryonification_shelldisp_grid1_missing4
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_out=bary_hires --n_cores=1 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/experiments/tomaszk/projects/220422_cosmogrid_paper/005_cosmogridv11/bary_hires/ --tasks="4528"
-
-# - name: //baryonification_shelldisp_grid1_missing5
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_. out=bary_hires --n_cores=7 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/experiments/tomaszk/projects/220422_cosmogrid_paper/005_cosmogridv11/bary_hires/ --tasks="8930,8931,8932,8933,8934,8935,8936"
-
-# - name: //baryonification_shelldisp_benchmark
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_out=bary_hires --tasks="20900>20920" --n_cores=20 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/experiments/tomaszk/projects/220422_cosmogrid_paper/005_cosmogridv11/bary_hires/
-
-# - name: //baryonification_shelldisp_deltabary
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_out=bary_hires --tasks="1400>2200" --n_cores=800 --mode=jobarray --verbosity=info --dir_out_archive=tomaszk@login.phys.ethz.ch:/home/ipa/refreg/experiments/tomaszk/projects/220422_cosmogrid_paper/005_cosmogridv11/bary_hires/
-
-# - name: //baryonification_shelldisp_missing
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_baryonification.py displace_shells --config=config_hires.yaml   --dir_out=bary_hires --tasks="0>20920" --n_cores=3400 --mode=run --function=missing --verbosity=info 
-
-
-# source clustering
-
-# - name: //ker_stage3_hires
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_create_probe_kernels.py --config=config_hires.yaml --dir_out=CosmoGrid/test_sc --tasks="0" --n_cores=1 --verbosity=info --mode=jobarray 
-
-# - name: //map_stage3_hires_fiducial
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_project_shells.py --config=config_hires.yaml   --dir_out=CosmoGrid/test_sc --par_ids="0" --tasks="0" --verbosity=info
-#   dep: ker_stage3_hires
-
-
-
-# # redshift perturbations
-
-# - name: //ker_desy3_nzperturb_table
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_create_permutation_table.py --config=config_hires.yaml --dir_out=CosmoGrid/test_redshift   
-
-# - name: //ker_desy3_nzperturb
-#   cmd: esub repos/UFalcon/src/cosmogridv1/apps/run_create_probe_kernels.py --config=config_hires.yaml --dir_out=CosmoGrid/v11desy3  --tasks="0>42040" --n_per_index=40 --n_cores=1051 --verbosity=info --mode=jobarray 
-
-
-
+- name: proj_grid
+  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml      --dir_out=v11desy3    --num_maps_per_index=10 --tasks="1700>6700""  --verbosity=info --mode=jobarray --n_cores=5000
 
