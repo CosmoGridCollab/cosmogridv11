@@ -53,15 +53,21 @@ Downstream processig for applying survey masks, noise, systematics, etc, is not 
 
 | dataset | content |
 | ------------- | ------------- | 
-| `'parameters/all` | baryonification parameters for all simultions, number of rows corresponds to the number of *baryonified* simulations. Datasets `grid`, `fiducial` and `benchmark` contain the same but split into dataset types. | 
-| `diff_shell_inds` | indices of healpix pixels that are different between the dmo and dmb | 
-| `diff_shell_vals | difference between values of dmo and dmb for the modified pixels |
-| `shell_dicts` | shell information |
+| `'parameters/all` | baryonification parameters for all unique parameter sets, extending the cosmology metainfo parameters, number of rows corresponds to the number of *baryonified* parameter sets. Datasets `grid`, `fiducial` and `benchmark` contain the same but split into dataset types. | 
+| `simulations/all` | baryonificatied simulations for all unique simulations sets, extending the cosmology metainfo parameters, number of rows corresponds to the number of *baryonified* simulations. Same as above for other types. |
+| `shell_info` | shell info for *baryonified* parameters, matching the paths in `parameters`.  |
 
 
 
 
+### The profiled halos catalog, `profiled_halos_v11.h5`
 
+
+
+| dataset | content |
+| ------------- | ------------- | 
+| `'shell{:03d}/halo_pos` | 3D positions of halos, number of rows corresponds to the total number of halos in the lightcone. Match with `halo_props` with `uid`. | 
+| `'shell{:03d}/halo_props` | 3D positions of halos, number of rows corresponds to the total number of *unique* halos in the lightcone, no replication. Match with `halo_pos` by `ID`. | 
 
 
 
