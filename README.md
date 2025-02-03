@@ -49,7 +49,14 @@ Downstream processig for applying survey masks, noise, systematics, etc, is not 
 ## CosmoGridV11: output files
 
 
-### WIP
+### The baronification parameter table, `CosmoGridV1_bary_{tag}_metainfo.h5`
+
+| dataset | content |
+| ------------- | ------------- | 
+| `'parameters/all` | baryonification parameters for all simultions, number of rows corresponds to the number of *baryonified* simulations | 
+| `diff_shell_inds` | indices of healpix pixels that are different between the dmo and dmb | 
+| `diff_shell_vals | difference between values of dmo and dmb for the modified pixels |
+| `shell_dicts` | shell information |
 
 
 
