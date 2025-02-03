@@ -53,7 +53,7 @@ Downstream processig for applying survey masks, noise, systematics, etc, is not 
 
 | dataset | content |
 | ------------- | ------------- | 
-| `'parameters/all` | baryonification parameters for all unique parameter sets, extending the cosmology metainfo parameters, number of rows corresponds to the number of *baryonified* parameter sets. Datasets `grid`, `fiducial` and `benchmark` contain the same but split into dataset types. | 
+| `parameters/all` | baryonification parameters for all unique parameter sets, extending the cosmology metainfo parameters, number of rows corresponds to the number of *baryonified* parameter sets. Datasets `grid`, `fiducial` and `benchmark` contain the same but split into dataset types. | 
 | `simulations/all` | baryonificatied simulations for all unique simulations sets, extending the cosmology metainfo parameters, number of rows corresponds to the number of *baryonified* simulations. Same as above for other types. |
 | `shell_info` | shell info for *baryonified* parameters, matching the paths in `parameters`.  |
 
