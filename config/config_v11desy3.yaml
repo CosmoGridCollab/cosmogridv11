@@ -1,0 +1,94 @@
+tag: v11desy3
+
+redshifts_nz:
+
+  # https://ui.adsabs.harvard.edu/abs/2022PhRvD.105b3520A/abstract Table 1
+  - name: metacal1
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_source_bin1.txt
+    probes: ['kg', 'dg', 'ia']
+    z_max: 3.0
+    delta_mean_z: [0.0, 0.018]
+    
+  - name: metacal2
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_source_bin2.txt
+    probes: ['kg', 'dg', 'ia']
+    z_max: 3.0
+    delta_mean_z: [0.0, 0.015]
+
+  - name: metacal3
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_source_bin3.txt
+    probes: ['kg', 'dg', 'ia']
+    z_max: 3.0
+    delta_mean_z: [0.0, 0.011]
+
+  - name: metacal4
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_source_bin4.txt
+    probes: ['kg', 'dg', 'ia']
+    z_max: 3.0
+    delta_mean_z: [0.0, 0.017]
+
+  - name: maglim1
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin1.txt
+    probes: ['dg']
+    z_max: 3.0
+    delta_mean_z: [-0.009, 0.007]
+    delta_sigma_z: [-0.02, 0.06]
+
+  - name: maglim2
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin2.txt
+    probes: ['dg']
+    z_max: 3.0
+    delta_mean_z: [-0.035, 0.011]
+    delta_sigma_z: [0.31, 0.09]
+
+  - name: maglim3
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin3.txt
+    probes: ['dg']
+    z_max: 3.0
+    delta_mean_z: [-0.005, 0.006]
+    delta_sigma_z: [-0.13, 0.05]
+
+  - name: maglim4
+    file: $MODULE_DIR/resources//redshift_distributions/desy3_nz_maglim_bin4.txt
+    probes: ['dg']
+    z_max: 3.0
+    delta_mean_z: [-0.007, 0.006]
+    delta_sigma_z: [-0.08, 0.05]
+
+  # - name: cmb
+  #   z_cmb: 1090.
+  #   file_high_z_cls: 
+  #     kcmb: /cluster/work/refregier/tomaszk/projects/220708_cosmogrid_paper/007_reshuffle_weights/cls_cmblensing_from_z3p5_v2.h5
+  #   probes: ['kcmb']
+
+redshift_error_method: desy3
+
+paths:
+  cosmogrid_root: tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/
+  cosmogrid_halos: tomaszk@login.phys.ethz.ch:/home/ipa/refreg/data/data_products/CosmoGrid/processed/v11/
+  cosmogrid_bary: /global/cfs/cdirs/des/cosmogrid/processed/v11/CosmoGrid/bary/
+  redshift_perturbations_list: /global/cfs/cdirs/des/cosmogrid/processed/v11desy3/metainfo_perms.npy
+  metainfo_bary: Fluri+2022
+  
+projection:
+  shell_perms: True
+  shell_perms_seed: 424242
+  highz_synfast_seed: 3212312
+  n_max_shells: 69
+  n_steps: 140
+  n_max_replicas: 7
+  n_max_sims_use: inf
+  n_perms_per_cosmo:
+    fiducial: 1000
+    grid: 20
+    benchmarks: 20
+  survey_mask: False
+  # survey_mask: $MODULE_DIR/resources/survey_masks/DESY3_allpixels_nside1024.h5
+
+analysis_variants:
+  - v11dmb
+
+
+baryonification:
+  nside_out: 1024
+  tag: v11
