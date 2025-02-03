@@ -66,8 +66,8 @@ Downstream processig for applying survey masks, noise, systematics, etc, is not 
 
 | dataset | content |
 | ------------- | ------------- | 
-| `'shell{:03d}/halo_pos` | 3D positions of halos, number of rows corresponds to the total number of halos in the lightcone. Match with `halo_props` with `uid`. | 
-| `'shell{:03d}/halo_props` | 3D positions of halos, number of rows corresponds to the total number of *unique* halos in the lightcone, no replication. Match with `halo_pos` by `ID`. | 
+| `shell{:03d}/halo_pos` | 3D positions of halos, number of rows corresponds to the total number of halos in the lightcone. Match with `halo_props` with `uid`. | 
+| `shell{:03d}/halo_props` | 3D positions of halos, number of rows corresponds to the total number of *unique* halos in the lightcone, no replication. Match with `halo_pos` by `ID`. | 
 
 
 
