@@ -630,10 +630,7 @@ def store_permlist(fname, permlist):
 
 if __name__ == '__main__':
 
-    if '--help' in sys.argv:
-        show_help()
-    else:
-        main([0], sys.argv[1:])
+    next(main([0], sys.argv[1:]))
     
 
 
