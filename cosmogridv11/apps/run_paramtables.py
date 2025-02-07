@@ -7,8 +7,8 @@ author: Tomasz Kacprzak
 """
 
 import os, sys, warnings, argparse, h5py, numpy as np, time, logging, itertools, shutil
-from cosmogridv1 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_maps, utils_arrays
-from cosmogridv1.filenames import *
+from cosmogridv11 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_maps, utils_arrays
+from cosmogridv11.filenames import *
 import healpy as hp
 
 warnings.filterwarnings('ignore', category=DeprecationWarning)
