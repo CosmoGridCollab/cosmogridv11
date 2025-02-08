@@ -15,7 +15,7 @@ import h5py
 import os
 import time
 
-from cosmogridv1 import utils_logging, utils_arrays
+from cosmogridv11 import utils_logging, utils_arrays
 LOGGER = utils_logging.get_logger(__file__)
 
 
