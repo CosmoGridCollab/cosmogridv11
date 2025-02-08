@@ -10,9 +10,9 @@ import io, os, sys, warnings, argparse, h5py, numpy as np, time, logging, iterto
 import healpy as hp
 from glob import glob
 from tqdm import tqdm, trange
-from cosmogridv1 import utils_logging, utils_io, utils_arrays, utils_cosmogrid, utils_config, utils_maps
-from cosmogridv1.copy_guardian import NoFileException
-from cosmogridv1.filenames import *
+from cosmogridv11 import utils_logging, utils_io, utils_arrays, utils_cosmogrid, utils_config, utils_maps
+from cosmogridv11.copy_guardian import NoFileException
+from cosmogridv11.filenames import *
 
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=RuntimeWarning)
@@ -414,7 +414,7 @@ def decompress_halos_files(filename_halos_local):
 
 def load_baryonification_params(fname):
 
-    from cosmogridv1 import baryonification
+    from cosmogridv11 import baryonification
     sys.path.append(os.path.join(baryonification.__path__[0], '..')) # this is for back-compat with baryonification_params.py scripts
     import importlib.util
     spec = importlib.util.spec_from_file_location("baryonification_params.par", fname)
@@ -432,7 +432,7 @@ def gen_halocone(conf, shell_info, params_bary, test=False):
     """
 
 
-    from cosmogridv1 import baryonification
+    from cosmogridv11 import baryonification
 
     # initialise parameters
     # sys.path.append('.') 
@@ -480,7 +480,7 @@ def baryonify_shells(conf, filename_halocone, filename_shells, params_bary, test
     This runs baryonification.
     """
 
-    from cosmogridv1 import baryonification
+    from cosmogridv11 import baryonification
 
     """
     This script baryonifies the compressed shells of a CosmoGrid simulation given a HaloCone and parameters
