@@ -7,7 +7,7 @@ from __future__ import print_function
 from __future__ import division
 
 from scipy.special import erf
-from scipy.integrate import simps, cumtrapz
+from scipy.integrate import simpson, cumulative_trapezoid
 from scipy.optimize import fsolve
 from scipy.interpolate import splrep, splev
 from .constants import *
@@ -225,7 +225,7 @@ def profiles(rbin, Mvir, cvir, Mc, mu, thej, cosmo_corr, cosmo_bias, param, rhoc
     rho2h     = (cosmo_bias*cosmo_corr + 1.0)*Om*RHOC #rho_b=const in comoving coord.
     rhoDMO    = rhoNFW + rho2h
     MNFW      = MNFWtr_fct(rbin,tr_cvir,tr_tau,tr_Mvir,rhoc)
-    M2h       = cumtrapz(4.0*np.pi*rbin**2.0*rho2h,rbin,initial=rbin[0])
+    M2h       = cumulative_trapezoid(4.0*np.pi*rbin**2.0*rho2h,rbin,initial=rbin[0])
     MDMO      = MNFW + M2h
 
     #Final density and mass profiles
@@ -233,12 +233,12 @@ def profiles(rbin, Mvir, cvir, Mc, mu, thej, cosmo_corr, cosmo_bias, param, rhoc
     beta  = beta_fct(Mvir,Mc,3.0,mu)
     gamma = 2.0
     uHGA     =  uHGA_fct(r=rbin,rm=rej,rc=rco,al=alpha,be=beta,ga=gamma)
-    rho0HGA  = Mtot/(4.0*np.pi*simps(rbin**2.0*uHGA,rbin))
+    rho0HGA  = Mtot/(4.0*np.pi*simpson(rbin**2.0*uHGA,x=rbin))
     rhoHGA   = rho0HGA*uHGA
     R12      = 0.015*rvir
     rho0CGA  = Mtot/(4.0*np.pi**(3.0/2.0)*R12)
     rhoCGA   = rho0CGA*uCGA_fct(rbin,Mvir,rhoc)
-    MHGA     = cumtrapz(4.0*np.pi*rbin**2.0*rhoHGA,rbin,initial=rbin[0]) + M2h
+    MHGA     = cumulative_trapezoid(4.0*np.pi*rbin**2.0*rhoHGA,rbin,initial=rbin[0]) + M2h
     MCGA     = Mtot*MCGA_fct(rbin,Mvir,rhoc) + M2h
     MHGA_tck = splrep(rbin, MHGA, s=0, k=3)
     MCGA_tck = splrep(rbin, MCGA, s=0, k=3)
@@ -288,8 +288,8 @@ def profiles(rbin, Mvir, cvir, Mc, mu, thej, cosmo_corr, cosmo_bias, param, rhoc
     # integrate (factor of 2 because r_int > 0, we integrate from the plane through the center)
     projected_rho_DMO = 2*np.trapz(rhoDMO_int, rbin, axis=0)
     projected_rho_DMB = 2*np.trapz(rhoDMB_int, rbin, axis=0)
-    integrated_mass_DMO = cumtrapz(2.0 * np.pi * rbin * projected_rho_DMO, rbin, initial=1e-8)
-    integrated_mass_DMB = cumtrapz(2.0 * np.pi * rbin * projected_rho_DMB, rbin, initial=1e-8)
+    integrated_mass_DMO = cumulative_trapezoid(2.0 * np.pi * rbin * projected_rho_DMO, rbin, initial=1e-8)
+    integrated_mass_DMB = cumulative_trapezoid(2.0 * np.pi * rbin * projected_rho_DMB, rbin, initial=1e-8)
 
     #define dictionaries
     frac = { 'CDM':fcdm, 'CGA':fcga, 'SGA':fsga, 'HGA':fhga }
