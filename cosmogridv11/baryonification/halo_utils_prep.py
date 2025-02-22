@@ -1035,7 +1035,7 @@ def get_baryon_shells(param, shells, shells_info, halos, delta_shell=True, nside
 def shell_stats_list_to_arr(shell_stats):
 
     from cosmogridv1 import utils_arrays
-    shell_stats_arr = np.empty(len(shell_stats), dtype=utils_arrays.get_dtype(['n_halos:i4', 'n_halos_unique:i4', 'n_parts:i4', 'n_parts_unique:i4', 'shell_path:a256']))
+    shell_stats_arr = np.empty(len(shell_stats), dtype=utils_arrays.get_dtype(['n_halos:i4', 'n_halos_unique:i4', 'n_parts:i4', 'n_parts_unique_FDM:i4', 'n_parts_unique_BAR:i4', 'shell_path:a256']))
     for i, s_ in enumerate(shell_stats):
         for k in s_.keys():
             shell_stats_arr[i][k] = s_[k]
