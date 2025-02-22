@@ -474,6 +474,7 @@ def read_shells(filename_shells):
     return particle_shells, particle_shells_info
     
 # @profile
+# The new version now outputs two shells: baryon_shells_FDM and baryon_shells_BAR. Update it here once the code runs.
 def baryonify_shells(conf, filename_halocone, filename_shells, params_bary, test=False):
     """
     https://cosmo-gitlab.phys.ethz.ch/jafluri/arne_handover/-/blob/main/carpet/baryons/baryonify_shells.py
