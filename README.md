@@ -134,9 +134,17 @@ This file contains a recarray with the following columns:
 
 | column | content |
 | ------------- | ------------- | 
-| `As`, `H0`, `O_cdm`, `O_nu`, `Ob`, `Ol`, `Om` | Cosmological parameters |
-| `bary_Mc`, `bary_eta_cga`, `bary_eta_tot`, `bary_mu`, `bary_nu`, `bary_thco`, `bary_thej` | Baryon correction model parameters | `benchmark_type` | Grid and fiducial simulations contain `none` in this field. For benchmark simulaitons, this specifies the type of benchmark: `box_size`, `fiducial_bench`, `particle_count`, `redshift_resolution` |
-
-
-`box_size_Mpc_over_h`, `delta`, `id_param`, `m_nu`, `n_particles`, `n_shells`, `n_steps`, `ns`, `path_par`, `row_id_parslist`, `s8`, `sobol_index`, `w0`, `wa`, `dirname_perm`, `id_redshift_perturb`, `id_perm`, `source0__delta_meanz`, `source0__delta_sigmaz`, `source1__delta_meanz`, `source1__delta_sigmaz`, `source2__delta_meanz`, `source2__delta_sigmaz`, `source3__delta_meanz`, `source3__delta_sigmaz`, `source4__delta_meanz`, `source4__delta_sigmaz`, `lens0__delta_meanz`, `lens0__delta_sigmaz`, `lens1__delta_meanz`, `lens1__delta_sigmaz`, `lens2__delta_meanz`, `lens2__delta_sigmaz`, `lens3__delta_meanz`, `lens3__delta_sigmaz`, `lens4__delta_meanz`, `lens4__delta_sigmaz`
+| `As`, `H0`, `O_cdm`, `O_nu`, `Ob`, `Ol`, `Om`, `ns`, `s8`, `w0`, `wa`, `m_nu` | Cosmological parameters. |
+| `bary_Mc`, `bary_eta_cga`, `bary_eta_tot`, `bary_mu`, `bary_nu`, `bary_thco`, `bary_thej`| Baryon correction model parameters. | `benchmark_type` | Grid and fiducial simulations contain `none` in this field. For benchmark simulaitons, this specifies the type of benchmark: `box_size`, `fiducial_bench`, `particle_count`, `redshift_resolution`. |
+| `box_size_Mpc_over_h`, `n_particles`,  `n_steps` | Simulation parameters. |
+| `delta` | For grid and benchmark simulations, this field is 'none'. For fiducial simulations, this columns gives the parameter which was perturbed away from the fiducial.
+| `n_shells` | Number of stored shells. |
+| `row_id_parslist` | Row in the table `parameters/all` from file `CosmoGridV1_metainfo.h5`. |
+| `id_param` | Parameters id for grid simulations 0 - 2500. |
+| `id_perm` | Permutation index for a given cosmology, according to the projection configuration specified. |
+| `path_par` | Relative path to the top-leve parameter set directory. |
+| `dirname_perm` | Relative path to the simulation directory. |
+| `sobol_index` | Index of the parameter in the Sobol sequence used to create this parameter set. |
+| `id_redshift_perturb` | Index of the redshift perturbation for the grid. |
+| `{sample}__delta_meanz`, `{sample}__delta_sigmaz` | Redshift perturbation parameters. |
 
