@@ -125,10 +125,18 @@ This allows to compare the Cell CosmoGrid with PyCCL accounting for the pixeliza
 
 # LSST Y1 Forecast
 
-There are initial test CosmoGridV1 simulations for LSST redshift bins at NERSC: `/global/cfs/cdirs/des/cosmogrid/processed/v11lssty1forecast/`
+There are initial test CosmoGridV1 simulations for LSST redshift bins at NERSC: `/global/cfs/cdirs/des/cosmogrid/processed/v11lssty1forecast/`.
+
+There are 100 shell permutations for the fiducial and 2 permutation per grid point.   
+The configuration used to create it is in this config:
+`/global/cfs/cdirs/des/cosmogrid/processed/v11lssty1forecast/config_v11lssty1forecast.yaml`.
+
+The redshift bins used here are from these files in this repository:
+`resources/redshift_distributions/lsstdesc_forecast_nz_y1_{sample}_bin{id}.txt`.
+
 
 There table containing information about the simulations is here:
-`/global/cfs/cdirs/des/cosmogrid/processed/v11lssty1forecast/metainfo_perms.npy'
+`/global/cfs/cdirs/des/cosmogrid/processed/v11lssty1forecast/metainfo_perms.npy`.
 
 This file contains a recarray with the following columns:
 
