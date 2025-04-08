@@ -123,5 +123,20 @@ This allows to compare the Cell CosmoGrid with PyCCL accounting for the pixeliza
 | `shell_groups/{i:d}` | A list of shells that created each group `i`, containing the rows from `shell_info`. |
 | `cell/probe/sample` | Power spectra of the maps. The columns are: `ell`, `cell_ccl`, `cell_map_ccl`, `cell_map`. See description above. |
 
+# LSST Y1 Forecast
 
+There are initial test CosmoGridV1 simulations for LSST redshift bins at NERSC: `/global/cfs/cdirs/des/cosmogrid/processed/v11lssty1forecast/`
+
+There table containing information about the simulations is here:
+`/global/cfs/cdirs/des/cosmogrid/processed/v11lssty1forecast/metainfo_perms.npy'
+
+This file contains a recarray with the following columns:
+
+| column | content |
+| ------------- | ------------- | 
+| `As`, `H0`, `O_cdm`, `O_nu`, `Ob`, `Ol`, `Om` | Cosmological parameters |
+| `bary_Mc`, `bary_eta_cga`, `bary_eta_tot`, `bary_mu`, `bary_nu`, `bary_thco`, `bary_thej` | Baryon correction model parameters | `benchmark_type` | Grid and fiducial simulations contain `none` in this field. For benchmark simulaitons, this specifies the type of benchmark: `box_size`, `fiducial_bench`, `particle_count`, `redshift_resolution` |
+
+
+`box_size_Mpc_over_h`, `delta`, `id_param`, `m_nu`, `n_particles`, `n_shells`, `n_steps`, `ns`, `path_par`, `row_id_parslist`, `s8`, `sobol_index`, `w0`, `wa`, `dirname_perm`, `id_redshift_perturb`, `id_perm`, `source0__delta_meanz`, `source0__delta_sigmaz`, `source1__delta_meanz`, `source1__delta_sigmaz`, `source2__delta_meanz`, `source2__delta_sigmaz`, `source3__delta_meanz`, `source3__delta_sigmaz`, `source4__delta_meanz`, `source4__delta_sigmaz`, `lens0__delta_meanz`, `lens0__delta_sigmaz`, `lens1__delta_meanz`, `lens1__delta_sigmaz`, `lens2__delta_meanz`, `lens2__delta_sigmaz`, `lens3__delta_meanz`, `lens3__delta_sigmaz`, `lens4__delta_meanz`, `lens4__delta_sigmaz`
 
