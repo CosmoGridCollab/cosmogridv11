@@ -5,7 +5,7 @@
 # Author: Silvan Fischbacher & Tomasz Kacprzak
 # From: https://cosmo-gitlab.phys.ethz.ch/cosmo_public/redshift_tools/-/blob/master/src/redshift_tools/manipulate.py
 
-from cosmogridv1 import utils_logging
+from cosmogridv11 import utils_logging
 from UFalcon import probe_weights
 
 import warnings
