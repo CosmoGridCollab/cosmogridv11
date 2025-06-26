@@ -23,23 +23,23 @@ There is a number of apps that can be used to accomplish consecutive stages of p
 1)  Baryonification      
 
     1.1 Create a table that contains input parameters for baryonification, specified in `config_v11.yaml`:      
-    ``python -m cosmogridv1.apps.run_paramtables baryon_params --config=config_v11.yaml --help``     
+    ``python -m cosmogridv11.apps.run_paramtables baryon_params --config=config_v11.yaml --help``     
     
     The resulting output file will be `CosmoGridV11_bary_{tag}_metainfo.h5`, where `{tag}` is the entry in the config under `baryonification/tag:`.
     After the file is created, make sure to include it in the config under `paths/metainfo_bary:`, for later use.
 
     1.2 Displace shells using the halocone:      
-    ``python -m cosmogridv1.apps.run_haloops baryonify_shells  --config=config_v11.yaml  --help``     
+    ``python -m cosmogridv11.apps.run_haloops baryonify_shells  --config=config_v11.yaml  --help``     
 
 3)  Create projected probe maps      
 
     2.1 Create shell permutation table, including perturbations to n(z), according to the config:      
-    ``python -m cosmogridv1.apps.run_paramtables shell_permutations --config=config_v11desy3.yaml``
+    ``python -m cosmogridv11.apps.run_paramtables shell_permutations --config=config_v11desy3.yaml``
     The resulting output file will be `metainfo_perms.npy`, in the output directory.
     After the file is created, make sure to include it in the config under `paths/redshift_perturbation_list:`, for later use.
     
     2.2 Create projected probe maps:      
-     ``python -m cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml --help``      
+     ``python -m cosmogridv11.apps.run_probemaps --config=config_v11desy3.yaml --help``      
 
 The output files will contain full-sky probe maps, without noise, masks, and systematics.
 The intrinsic alignment map can be added to the convergence map with an appropriate amplitude.
@@ -123,5 +123,36 @@ This allows to compare the Cell CosmoGrid with PyCCL accounting for the pixeliza
 | `shell_groups/{i:d}` | A list of shells that created each group `i`, containing the rows from `shell_info`. |
 | `cell/probe/sample` | Power spectra of the maps. The columns are: `ell`, `cell_ccl`, `cell_map_ccl`, `cell_map`. See description above. |
 
+# LSST Y1 Forecast
 
+There are initial test CosmoGridV1 simulations for LSST redshift bins at NERSC: `/global/cfs/cdirs/des/cosmogrid/processed/v11lssty1forecast/`.
+
+There are 100 shell permutations for the fiducial and 2 permutation per grid point.   
+The configuration used to create it is in this config:
+`/global/cfs/cdirs/des/cosmogrid/processed/v11lssty1forecast/config_v11lssty1forecast.yaml`.
+
+The redshift bins used here are from these files in this repository:
+`resources/redshift_distributions/lsstdesc_forecast_nz_y1_{sample}_bin{id}.txt`.
+
+
+There table containing information about the simulations is here:
+`/global/cfs/cdirs/des/cosmogrid/processed/v11lssty1forecast/metainfo_perms.npy`.
+
+This file contains a recarray with the following columns:
+
+| column | content |
+| ------------- | ------------- | 
+| `As`, `H0`, `O_cdm`, `O_nu`, `Ob`, `Ol`, `Om`, `ns`, `s8`, `w0`, `wa`, `m_nu` | Cosmological parameters. |
+| `bary_Mc`, `bary_eta_cga`, `bary_eta_tot`, `bary_mu`, `bary_nu`, `bary_thco`, `bary_thej`| Baryon correction model parameters. | `benchmark_type` | Grid and fiducial simulations contain `none` in this field. For benchmark simulaitons, this specifies the type of benchmark: `box_size`, `fiducial_bench`, `particle_count`, `redshift_resolution`. |
+| `box_size_Mpc_over_h`, `n_particles`,  `n_steps` | Simulation parameters. |
+| `delta` | For grid and benchmark simulations, this field is 'none'. For fiducial simulations, this columns gives the parameter which was perturbed away from the fiducial.
+| `n_shells` | Number of stored shells. |
+| `row_id_parslist` | Row in the table `parameters/all` from file `CosmoGridV1_metainfo.h5`. |
+| `id_param` | Parameters id for grid simulations 0 - 2500. |
+| `id_perm` | Permutation index for a given cosmology, according to the projection configuration specified. |
+| `path_par` | Relative path to the top-leve parameter set directory. |
+| `dirname_perm` | Relative path to the simulation directory. |
+| `sobol_index` | Index of the parameter in the Sobol sequence used to create this parameter set. |
+| `id_redshift_perturb` | Index of the redshift perturbation for the grid. |
+| `{sample}__delta_meanz`, `{sample}__delta_sigmaz` | Redshift perturbation parameters. |
 
