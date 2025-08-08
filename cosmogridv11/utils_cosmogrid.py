@@ -61,7 +61,7 @@ def get_simulations_list(set_type='all'):
 
 
     # get simulation list
-    dir_resources = os.path.join(os.path.dirname(__file__), 'resources')
+    dir_resources = os.path.join(os.path.dirname(__file__), '..', 'resources')
     fpath = os.path.join(dir_resources, 'CosmoGridV11_metainfo.h5')
     metainfo = read_cosmogrid_metainfo(fpath)
     # metainfo = utils_io.read_from_pickle(os.path.join(dir_resources, 'CosmoGrid_metainfo.pkl.gz'))
