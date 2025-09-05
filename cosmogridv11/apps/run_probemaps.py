@@ -6,10 +6,10 @@ author: Tomasz Kacprzak
 """
 
 import os, warnings, argparse, h5py, numpy as np, time
-from cosmogridv1 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_shells, utils_maps, utils_projection
-from cosmogridv1.filenames import *
+from cosmogridv11 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_shells, utils_maps, utils_projection
+from cosmogridv11.filenames import *
 import healpy as hp
-from cosmogridv1.copy_guardian import NoFileException
+from cosmogridv11.copy_guardian import NoFileException
 
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=RuntimeWarning)
@@ -236,6 +236,7 @@ def project_permuted_sims(index, args, conf):
                                                       n_max_replicas=int(conf['projection']['n_max_replicas']), 
                                                       seed=conf['projection']['shell_perms_seed'] + index_perm,
                                                       test=args.test)
+
 
     # PROJECTED MAPS
 
@@ -492,7 +493,7 @@ def check_cls_for_probes(probe_maps, nz_info, params, plot=False):
 
 def get_probe_kernels(nz_info, params, shellinfo, nside_out, perm=None, redshift_error_method='fishbacher', test=False):
 
-    from cosmogridv1 import utils_redshift, utils_projection
+    from cosmogridv11 import utils_redshift, utils_projection
 
     n_samples = len(nz_info)
     LOGGER.info(f'using {n_samples} redshift bins')

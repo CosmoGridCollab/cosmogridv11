@@ -481,6 +481,9 @@ def get_kernel_ia(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, tes
     sample[f'w_ia'] = np.zeros(len(shell_info))
     weight_generator_ia = probe_weights.Continuous_intrinsic_alignment2(n_of_z=sample['nz'], 
                                                                        **kw_ufalcon)
+
+
+
     
     for s in range(len(shell_info)):
 
@@ -495,7 +498,30 @@ def get_kernel_ia(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, tes
                                        cosmo=astropy_cosmo)
 
             sample['w_ia'][s] = w_ia 
-    
+
+
+    def get_eta_ia_weights(eta_ia, z0, z, nz, shell_info):    
+        
+        z = sample['nz'][:,0]
+        nz = sample['nz'][:,1] / np.sum(sample['nz'][:,1])
+        cnz = np.cumsum(nz)
+        from scipy.optimize import bisect
+        lim_lo = bisect(f=lambda x: (np.interp(x, z, cnz) - 0.05), a=0, b=4)
+        lim_hi = bisect(f=lambda x: (np.interp(x, z, cnz) - 0.95), a=0, b=4)
+        w_eta_ia = ((1+z)/(1+z0))**eta_ia
+        from scipy.integrate import quad
+        w_eta_ia_shell = np.zeros(len(shell_info))
+        support = (z>lim_lo) * (z<lim_hi)
+        for s in range(len(shell_info)):
+            if check_zbound(shell_info, s, z_lim_up, probe):
+                select = (z>shell_info['lower_z'][s]) * (z<shell_info['upper_z'][s])
+                w_eta_ia_shell[s] = np.mean((w_eta_ia * support)[select] )
+
+        LOGGER.warning(f'adding eta_ia={eta_ia} {w_eta_ia_shell}')        
+        return w_eta_ia_shell
+
+    w_eta_ia_shell = get_eta_ia_weights(eta_ia=1, z0=0.62, z=sample['nz'][:,0], nz=sample['nz'][:,1], shell_info=shell_info)
+    sample['w_ia'] *= w_eta_ia_shell
     sample['nz_norm'] = weight_generator_ia.nz_norm
 
     return sample
