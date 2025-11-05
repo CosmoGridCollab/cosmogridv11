@@ -7,9 +7,8 @@ author: Tomasz Kacprzak
 """
 
 import os, sys, warnings, argparse, h5py, numpy as np, time, logging, itertools, shutil
-from cosmogridv1 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_maps, utils_arrays
-from cosmogridv1.filenames import *
-from UFalcon import probe_weights
+from cosmogridv11 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_maps, utils_arrays
+from cosmogridv11.filenames import *
 import healpy as hp
 
 warnings.filterwarnings('ignore', category=DeprecationWarning)
@@ -20,7 +19,7 @@ LOGGER = utils_logging.get_logger(__file__)
 
 def get_redshift_perturb(index, nz_info, offset=0):
 
-    from cosmogridv1.utils_redshift import sample_redshift_perturb_params
+    from cosmogridv11.utils_redshift import sample_redshift_perturb_params
 
     # first permutation always has 
 
@@ -158,7 +157,6 @@ def setup(args):
 
 def main(args):
 
-    from UFalcon import probe_weights
 
     # make tf records
 

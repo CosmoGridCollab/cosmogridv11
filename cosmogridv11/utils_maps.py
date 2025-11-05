@@ -12,6 +12,7 @@ def load_mask(filepath):
 
 def load_nz(filepath, z_max=None):
 
+    assert os.path.isfile(filepath), f'file {filepath} not found, pwd={os.getcwd()}'
     nz_info = np.loadtxt(filepath)
     LOGGER.debug(f'loaded redshift distribution data {filepath}')
 
@@ -34,7 +35,7 @@ def cleanup_cosmogrid_files():
 
 def copy_cosmogrid_file(conf, path_sim, filename, check_existing=False, noguard=False, store_key='root', rsync_args='', rsync_R=False):
 
-    from cosmogridv1.copy_guardian import CopyGuardian, is_remote
+    from cosmogridv11.copy_guardian import CopyGuardian, is_remote
 
     if rsync_R:
         rsync_args += ' -R '
@@ -150,7 +151,7 @@ def load_shells(conf, path_sim, filename_shells, check_existing=False, noguard=F
     filepath_shells = os.path.join(conf['paths']['cosmogrid_root'], path_sim, filename_shells)
     filepath_shells_local = copy_cosmogrid_file(conf, path_sim, filename_shells, check_existing=check_existing, noguard=noguard)
 
-    # from cosmogridv1.copy_guardian import CopyGuardian, NoFileException, is_remote
+    # from cosmogridv11.copy_guardian import CopyGuardian, NoFileException, is_remote
 
     # filepath_shells = os.path.join(conf['paths']['cosmogrid_root'], path_sim, filename_shells)
     # filepath_shells_local = copy_cosmogrid_file(conf, path_sim, filename_shells)
@@ -227,7 +228,7 @@ def load_compressed_shells(filepath_shells, tmp_dir=None):
 
 def load_shells_uncompressed(path_sim):
 
-    from cosmogridv1.copy_guardian import CopyGuardian, NoFileException, is_remote
+    from cosmogridv11.copy_guardian import CopyGuardian, NoFileException, is_remote
     import healpy as hp
 
     import glob
