@@ -7,15 +7,14 @@ author: Tomasz Kacprzak
 """
 
 import os, sys, warnings, argparse, h5py, numpy as np, time, logging, itertools, shutil
-from cosmogridv1 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_arrays
-from cosmogridv1.filenames import *
+from cosmogridv11 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_arrays
+from cosmogridv11.filenames import *
 import healpy as hp
 
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=RuntimeWarning)
 warnings.filterwarnings('once', category=UserWarning)
 LOGGER = utils_logging.get_logger(__file__)
-from UFalcon import probe_weights
 
 
 def add_flips_and_rots(shells_group, perms_info):
@@ -24,7 +23,7 @@ def add_flips_and_rots(shells_group, perms_info):
     """
 
     # apply permutations
-    from cosmogridv1.utils_healpix import rotate_pix, mirror_pix
+    from cosmogridv11.utils_healpix import rotate_pix, mirror_pix
     healpix_pixel_indices = np.arange(shells_group.shape[1])
 
     if perms_info['rot'] > 0:

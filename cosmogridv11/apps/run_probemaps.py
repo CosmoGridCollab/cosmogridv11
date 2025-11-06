@@ -6,10 +6,10 @@ author: Tomasz Kacprzak
 """
 
 import os, warnings, argparse, h5py, numpy as np, time
-from cosmogridv1 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_shells, utils_maps, utils_projection
-from cosmogridv1.filenames import *
+from cosmogridv11 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_shells, utils_maps, utils_projection
+from cosmogridv11.filenames import *
 import healpy as hp
-from cosmogridv1.copy_guardian import NoFileException
+from cosmogridv11.copy_guardian import NoFileException
 
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=RuntimeWarning)
@@ -352,9 +352,10 @@ def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_
 
 def project_single_sim(index, args, conf):
 
-
+    permlist_all = utils_cosmogrid.load_permutations_list(conf)
     simslist_all, parslist_all, shellinfo_all = utils_cosmogrid.get_baryonified_simulations_list(conf, set_type='all')
-    sim_current = simslist_all[index]
+    sim_current = permlist_all[index]
+    
     shellinfo_current = shellinfo_all[sim_current['path_par']]
 
     LOGGER.info(f"=============================> index={index} sim={sim_current['path_par']}")
@@ -492,7 +493,7 @@ def check_cls_for_probes(probe_maps, nz_info, params, plot=False):
 
 def get_probe_kernels(nz_info, params, shellinfo, nside_out, perm=None, redshift_error_method='fishbacher', test=False):
 
-    from cosmogridv1 import utils_redshift, utils_projection
+    from cosmogridv11 import utils_redshift, utils_projection
 
     n_samples = len(nz_info)
     LOGGER.info(f'using {n_samples} redshift bins')
@@ -810,8 +811,8 @@ def arr_row_str(a):
     # :return shell_info_cov: shell info rec array with fields 'id', 'z_min', 'z_max', 'shell_cov', 'cov_inner', 'cov_outer'
     # """
 
-    # from cosmogridv1 import baryonification
-    # from cosmogridv1.baryonification import halocone
+    # from cosmogridv11 import baryonification
+    # from cosmogridv11.baryonification import halocone
 
 
     # # get z bounds for shells

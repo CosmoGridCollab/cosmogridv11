@@ -2,7 +2,7 @@
 import numpy as np, healpy as hp, h5py
 from . import utils_logging
 LOGGER = utils_logging.get_logger(__file__)
-from UFalcon import probe_weights
+
 # from numba import njit
 
 # @njit 
@@ -272,6 +272,8 @@ def check_zbound(shell_info, s, z_lim_up, probe):
 
 
 def get_kernel_shell(shell_info, astropy_cosmo, sim_params, kw_ufalcon, test=False):
+
+    from UFalcon import probe_weights
     
     z_lim_up = kw_ufalcon['z_lim_up']
     w_shell = np.zeros(len(shell_info))
@@ -295,6 +297,8 @@ def get_kernel_shell(shell_info, astropy_cosmo, sim_params, kw_ufalcon, test=Fal
 
 
 def get_kernel_kg(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, test=False):
+
+    from UFalcon import probe_weights
 
     probe = 'kg'
     z_lim_up = kw_ufalcon['z_lim_up']
@@ -323,6 +327,8 @@ def get_kernel_kg(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, tes
 
 
 def get_kernel_kd(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, test=False):
+    
+    from UFalcon import probe_weights
 
     probe = 'kd'
     z_lim_up = kw_ufalcon['z_lim_up']
@@ -362,6 +368,8 @@ def get_kernel_kd(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, tes
 
 
 def get_kernel_dg(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, test=False):
+
+    from UFalcon import probe_weights
 
     probe = 'dg'
     z_lim_up = kw_ufalcon['z_lim_up']
@@ -415,6 +423,8 @@ def get_kernel_dg(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, tes
 
 
 def get_kernel_dg2(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, test=False):
+
+    from UFalcon import probe_weights
 
     probe = 'dg2'
     z_lim_up = kw_ufalcon['z_lim_up']
@@ -475,6 +485,8 @@ def get_kernel_dg2(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, te
 
 
 def get_kernel_ia(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, test=False):
+
+    from UFalcon import probe_weights
     
     probe = 'ia'
     z_lim_up = kw_ufalcon['z_lim_up']
@@ -529,6 +541,8 @@ def get_kernel_ia(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, tes
 
 def get_kernel_kcmb(sample, shell_info, astropy_cosmo, sim_params, kw_ufalcon, test=False):
 
+    from UFalcon import probe_weights
+
     probe = 'kcmb'
     z_lim_up = kw_ufalcon['z_lim_up']
 
@@ -564,7 +578,7 @@ probe_kernel_funcs = {'kg': get_kernel_kg,
 def store_probe_kernels(filename_out, nz_info, w_shell, mode='w'):
 
     all_probes = ['kd', 'kg', 'ia', 'dg', 'dg2', 'kcmb', 'dh', 'dh2']
-    probe_weights = {'kd':'w_kd', 'kg':'w_kg', 'ia':'w_ia', 'dg':'w_dg', 'dg2': 'w_dg2', 'kcmb':'w_kcmb', 'dh':'w_dg', 'dh2':'w_dg2'}
+    probe_weights_dict = {'kd':'w_kd', 'kg':'w_kg', 'ia':'w_ia', 'dg':'w_dg', 'dg2': 'w_dg2', 'kcmb':'w_kcmb', 'dh':'w_dg', 'dh2':'w_dg2'}
     
     dataset_name = lambda nzi, probe: f"kernel/{probe}/{nzi['name']}"
 
@@ -586,7 +600,7 @@ def store_probe_kernels(filename_out, nz_info, w_shell, mode='w'):
 
             for probe in all_probes:
 
-                w_key = probe_weights[probe]
+                w_key = probe_weights_dict[probe]
                 if w_key in nzi.keys():
 
                     try:
