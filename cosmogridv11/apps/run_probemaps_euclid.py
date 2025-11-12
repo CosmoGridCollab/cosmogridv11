@@ -380,12 +380,12 @@ def euclid_map_projector(index, dirpath_out, variant, nside_maps, path_simulatio
 
 
     # store 
-    store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg)
+    store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance_parameters, ngal_glass)
     
 
     import pudb; pudb.set_trace();
 
-def store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg):
+def store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance_parameters, ngal_glass, cosmo_bundle):
 
 
     LOGGER.info('storing maps')
@@ -451,6 +451,10 @@ def store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg):
                 dset = f'ngal_glass/{i}'
                 LOGGER.info(f'storing {dset}')
                 f.create_dataset(name=dset, data=ngal, shuffle=True, compression="gzip", compression_opts=4)
+
+
+        # TODO: store nuisance parameters and cosmo bundle
+        
 
     LOGGER.info(f'stored maps to {filepath_out}')
     
