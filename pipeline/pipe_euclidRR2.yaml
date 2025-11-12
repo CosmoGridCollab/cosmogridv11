@@ -1,0 +1,8 @@
+# pilot project shells
+
+- name: //test_proj_fiddmb  
+  cmd: esub cosmogridv11.apps.run_probemaps_euclid --config=config_v11euclidRR2.yaml      --dir_out=v11euclidRR2/   --num_maps_per_index=10  --tasks="0"     --verbosity=info
+
+
+- name: //proj_fiddmb  
+  cmd: esub cosmogridv11.apps.run_probemaps_euclid --config=config_v11euclidRR2.yaml      --dir_out=v11euclidRR2/   --num_maps_per_index=10  --tasks="3400>4300"  --n_cores=70  --verbosity=info
