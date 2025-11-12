@@ -68,7 +68,7 @@ def resources(args):
     
     res = {'main_nsimult': 500,
            'main_memory':16000,
-           'main_time_per_index':8, # hours
+           'main_time_per_index':1, # hours
            'main_scratch':int(2000*args.num_maps_per_index),
            'merge_memory':64000,
            'merge_time':24,
@@ -85,7 +85,7 @@ def resources(args):
     if 'CLUSTER_NAME' in os.environ:
         
         if os.environ['CLUSTER_NAME'] == 'perlmutter':
-            res['pass'] = {'constraint': 'cpu', 'account': 'des', 'qos': 'shared'}
+            res['pass'] = {'constraint': 'cpu', 'qos': 'shared'}
             res['main_nsimult'] = 200
 
         if os.environ['CLUSTER_NAME'] == 'euler':
@@ -352,9 +352,15 @@ def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_
 
 def project_single_sim(index, args, conf):
 
-    permlist_all = utils_cosmogrid.load_permutations_list(conf)
     simslist_all, parslist_all, shellinfo_all = utils_cosmogrid.get_baryonified_simulations_list(conf, set_type='all')
-    sim_current = permlist_all[index]
+    sim_current = simslist_all[index]
+    # import pudb; pudb.set_trace();
+    # select = np.array(['grid' in s['path_par'] for s in simslist_all])
+    # inds = np.arange(len(simslist_all))
+    # data=inds[select][::7]
+    # with open("/global/cfs/cdirs/des/tomaszk7/projects/251021_cosmogridv1_euclid/000_test/inds_grid1.yaml", "w") as f:
+    #     for item in data:
+    #         f.write(f"- {item}\n")
     
     shellinfo_current = shellinfo_all[sim_current['path_par']]
 
@@ -370,7 +376,8 @@ def project_single_sim(index, args, conf):
                                          test=args.test)
 
     # prepare output
-    dirpath_out = get_dirname_projected_maps(args.dir_out, sim_current, id_run=sim_current['seed_index'], project_tag=conf['tag'])
+    id_run = int(sim_current['path_sim'].split('/')[-1].split('run_')[1])
+    dirpath_out = get_dirname_projected_maps(args.dir_out, sim_current, id_run=id_run, project_tag=conf['tag'])
     utils_io.robust_makedirs(dirpath_out)
     utils_io.ensure_permissions(dirpath_out, verb=True)
 

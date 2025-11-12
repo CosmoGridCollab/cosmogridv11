@@ -29,7 +29,7 @@ def get_dirname_projected_maps(dir_out, cosmo_params, project_tag, id_run):
 
     dirtag = f'/proj_{project_tag}/'
     path_par = cosmo_params['path_par'].replace('/bary/', dirtag).replace('/raw/', dirtag)
-    dir_output = os.path.join(dir_out, path_par, f"run_{id_run}")
+    dir_output = os.path.join(dir_out, path_par, f"run_{id_run:04d}")
     return dir_output
 
 def get_dirname_permuted_maps(dir_out, cosmo_params, project_tag, id_perm):
