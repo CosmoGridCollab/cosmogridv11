@@ -80,7 +80,7 @@ def resources(args):
         args = setup(args)
     
     res = {'main_nsimult': 500,
-           'main_memory':16000,
+           'main_memory': 128000,
            'main_time_per_index':1, # hours
            'main_scratch':int(2000*args.num_maps_per_index),
            'merge_memory':64000,
@@ -380,16 +380,15 @@ def euclid_map_projector(index, dirpath_out, variant, nside_maps, path_simulatio
 
 
     # store 
-    store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance_parameters, ngal_glass)
+    store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance_parameters, ngal_glass, cosmo_bundle, nside_maps)
     
 
-    import pudb; pudb.set_trace();
+    
 
-def store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance_parameters, ngal_glass, cosmo_bundle):
+def store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance_parameters, ngal_glass, cosmo_bundle, nside_maps):
 
 
     LOGGER.info('storing maps')
-    import pudb; pudb.set_trace();
 
     # create indices set
     hp_indices = np.arange(hp.nside2npix(nside_maps))
@@ -406,6 +405,7 @@ def store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance
 
         LOGGER.info(f'storing hp_indices')
         f.create_dataset(name='hp_indices', data=hp_indices, shuffle=True, compression="gzip", compression_opts=4)
+        f['hp_indices'].attrs['nside'] = nside_maps
 
         LOGGER.info('storing maps')
         if maps_WL is not None:
@@ -413,7 +413,7 @@ def store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance
             for sample_name, sample_data in maps_WL.items():
                 for field_name, field_data in sample_data.items():
                     dset = f'maps_WL/{sample_name}/{field_name}'
-                    LOGGER.info(f'storing {dset}')
+                    LOGGER.debug(f'storing {dset}')
                     f.create_dataset(name=dset, data=field_data[hp_indices], shuffle=True, compression="gzip", compression_opts=4)
 
         LOGGER.info('storing catalog')
@@ -422,39 +422,86 @@ def store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance
             for sample_name, sample_data in cat_WL.items():
                 for field_name, field_data in sample_data.items():
                     dset = f'cat_WL/{sample_name}/{field_name}'
-                    LOGGER.info(f'storing {dset}')
+                    LOGGER.debug(f'storing {dset}')
                     f.create_dataset(name=dset, data=field_data[hp_indices], shuffle=True, compression="gzip", compression_opts=4)
 
         LOGGER.info('storing kappa_tomo')
         if kappa_tomo is not None:
             for i, kappa in enumerate(kappa_tomo):
                 dset = f'kappa_tomo/{i}'
-                LOGGER.info(f'storing {dset}')
+                LOGGER.debug(f'storing {dset}')
                 f.create_dataset(name=dset, data=kappa[hp_indices], shuffle=True, compression="gzip", compression_opts=4)
                 
         if Cls is not None:
             LOGGER.info('storing Cls_sim')
             for i, Cl in enumerate(Cls):
                 dset = f'Cls_sim/{i}'
-                LOGGER.info(f'storing {dset}')
+                LOGGER.debug(f'storing {dset}')
                 f.create_dataset(name=dset, data=Cl, shuffle=True, compression="gzip", compression_opts=4)
 
         if Cgg is not None:
             LOGGER.info('storing Cls_theory')
             for i, Cl in enumerate(Cgg):
                 dset = f'Cls_theory/{i}'
-                LOGGER.info(f'storing {dset}')
+                LOGGER.debug(f'storing {dset}')
                 f.create_dataset(name=dset, data=Cl[i], shuffle=True, compression="gzip", compression_opts=4)
 
         if ngal_glass is not None:
             for i, ngal in enumerate(ngal_glass):
                 dset = f'ngal_glass/{i}'
-                LOGGER.info(f'storing {dset}')
+                LOGGER.debug(f'storing {dset}')
                 f.create_dataset(name=dset, data=ngal, shuffle=True, compression="gzip", compression_opts=4)
 
+        if nuisance_parameters is not None:
 
-        # TODO: store nuisance parameters and cosmo bundle
-        
+            for k, v in nuisance_parameters.items():
+
+                dset = f'nuissance_parameters/{k}'
+                f.create_dataset(name=dset, data=np.array(v))
+        LOGGER.info('stored nuissance parameters')
+
+        if cosmo_bundle is not None:
+
+                # astopy
+                fields = ['H0', 'Om0', 'Ode0', 'Tcmb0', 'Neff', 'M_nu', 'Ob0', 'w0']
+                for field in fields:
+                    try:
+                        val = np.array(getattr(cosmo_bundle['cosmo_astropy'], field, np.nan))
+                        dset = f'cosmo_astropy/{field}'
+                        f.create_dataset(name=dset, data=val)
+                        LOGGER.debug(f'stored {dset} {val}')
+                    except Exception as err:
+                        LOGGER.error('cosmo_astropy ' + field)
+                        LOGGER.error(err)
+
+                # pyccl
+                fields = ['Neff', 'Omega_b', 'Omega_c', 'h', 'm_nu', 'n_s', 'sigma8']
+                _cosmo = cosmo_bundle['cosmo_pyccl'].to_dict()
+                for field in fields:
+                    try:
+                        val = _cosmo[field]
+                        dset = f'cosmo_pyccl/{field}'
+                        f.create_dataset(name=dset, data=val)
+                        LOGGER.debug(f'stored {dset} {val}')
+                    except Exception as err:
+                        LOGGER.error('cosmo_pyccl ' + field)
+                        LOGGER.error(err)
+
+                # camb
+                fields = ['h', 'ombh2', 'omch2', 'omegab', 'omegac', 'omegam', 'omeganu', 'omk', 'omnuh2', 'Alens']
+                for field in fields:
+                    try:
+                        val = np.array(getattr(cosmo_bundle['pars_camb'], field, np.nan))
+                        dset = f'cosmo_camb/{field}'
+                        f.create_dataset(name=dset, data=val)
+                        LOGGER.debug(f'stored {dset} {val}')
+                    except Exception as err:
+                        LOGGER.error('pars_camb ' + field)
+                        LOGGER.error(err)
+        LOGGER.info('stored cosmo parameters')
+
+                        
+
 
     LOGGER.info(f'stored maps to {filepath_out}')
     
