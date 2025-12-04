@@ -203,31 +203,29 @@ def project_single_sim(index, args, conf):
     for variant in conf['analysis_variants']:
 
         LOGGER.info(f'==============> maps for variant={variant}')
-        
-        file_out = euclid_map_projector(index,
-                                        dirpath_out,
-                                        variant,
-                                        nside_maps=1024, 
-                                        path_simulations=os.path.join(conf['paths']['cosmogrid_bary'].rstrip('CosmoGrid/bary/'), sim_current['path_sim']), 
-                                        path_meta=conf['paths']['metainfo_bary'], 
-                                        path_SC_corrections=os.path.join(LSS_forward_model.__path__[0], '../Data/SC_RR2_fit_nov6.npy'), 
-                                        path_nz_RR2=conf['paths']['redshifts_euclid'], 
-                                        path_data_cats=conf['paths']['data_cats_euclid'])
 
-        files_variants.append(file_out)
+        filepath_out = get_filepath_projected_maps(dirpath_out, variant)
+        euclid_map_projector(index,
+                             filepath_out,
+                             variant,
+                             nside_maps=1024, 
+                             path_simulations=os.path.join(conf['paths']['cosmogrid_bary'].rstrip('CosmoGrid/bary/'), sim_current['path_sim']), 
+                             path_meta=conf['paths']['metainfo_bary'], 
+                             path_SC_corrections=os.path.join(LSS_forward_model.__path__[0], '../Data/SC_RR2_fit_nov6.npy'), 
+                             path_nz_RR2=conf['paths']['redshifts_euclid'], 
+                             path_data_cats=conf['paths']['data_cats_euclid'])
+
+        files_variants.append(filepath_out)
 
     return files_variants
 
             
 
 
-def euclid_map_projector(index, dirpath_out, variant, nside_maps, path_simulations, path_meta, path_SC_corrections, path_nz_RR2, path_data_cats, plots=False):
+def euclid_map_projector(index, filepath_out, variant, nside_maps, path_simulations, path_meta, path_SC_corrections, path_nz_RR2, path_data_cats, plots=False):
     """
     https://github.com/mgatti29/LSS_forward_model/blob/main/Examples/Cosmogrid.ipynb
     """
-
-
-    filepath_out = get_filepath_projected_maps(dirpath_out, variant)
 
     # Make a Cosmogrid Euclid RR2 catalog/map
 
@@ -528,43 +526,30 @@ def missing(indices, args):
         simslist_all, parslist_all, shell_info_all = utils_cosmogrid.get_baryonified_simulations_list(conf, set_type='all')
 
     list_missing = []
+    simslist_all, parslist_all, shellinfo_all = utils_cosmogrid.get_baryonified_simulations_list(conf, set_type='all')
 
     # loop over sims 
-
     for index in (pbar := LOGGER.progressbar(indices, desc='checking for missing results', at_level='info')):     
 
-        if conf['projection']['shell_perms'] == False:
+        sim_current = simslist_all[index]
+        shellinfo_current = shellinfo_all[sim_current['path_par']]
 
-            raise Exception('not implemented yet')
+        # prepare output
+        id_run = int(sim_current['path_sim'].split('/')[-1].split('run_')[1])
+        dirpath_out = get_dirname_projected_maps(args.dir_out, sim_current, id_run=id_run, project_tag=conf['tag'])
+        utils_io.robust_makedirs(dirpath_out)
+        utils_io.ensure_permissions(dirpath_out, verb=True)
 
-        else:
+        files_variants = []
+        for variant in conf['analysis_variants']:
 
-            perm_ids = np.arange(index*args.num_maps_per_index, (index+1)*args.num_maps_per_index)
-    
-            for perm_id in perm_ids:
+            filepath_out = get_filepath_projected_maps(dirpath_out, variant)
 
-                perm_current = permlist_all[perm_id]
-                index_perm =  perm_current['id_perm']
-                index_par = perm_current['row_id_parslist']
-                params_current = parslist_all[index_par] # this doesn't use anything about the sim, just the params, this is here to match the indexing scheme with the "no permutation" version
-                dirname_out = get_dirname_permuted_maps(dir_out=args.dir_out,
-                                                        project_tag=conf['tag'],
-                                                        cosmo_params=params_current,
-                                                        id_perm=index_perm)
-
-                for variant in conf['analysis_variants']:
-        
-                    filepath_out = get_filepath_projected_maps(dirname_out, variant)
-
-                    if not os.path.isfile(filepath_out):
-
-                        LOGGER.debug(f'{perm_id: 6d} /{len(indices)*args.num_maps_per_index} file missing: {filepath_out}')
-                        list_missing.append(index)
-                        pbar.set_description_str(f"checking for missing results, found {len(list_missing)} missing")
-
-                    else:
-
-                        LOGGER.debug(f'{perm_id: 6d} /{len(indices)*args.num_maps_per_index} file OK:      {filepath_out}')
+            if not os.path.isfile(filepath_out):
+                list_missing.append(index)
+                pbar.set_description_str(f"checking for missing results, found {len(list_missing)} missing")
+            else:
+                LOGGER.debug(f'file OK:      {filepath_out}')
 
 
 
