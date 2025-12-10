@@ -28,6 +28,8 @@ from LSS_forward_model.halos import *
 from LSS_forward_model.tsz import *
 from LSS_forward_model.theory import *
 
+from memory_profiler import profile
+
 
 # define args
 z_lim_low = 0 # for lss probes
@@ -80,13 +82,12 @@ def resources(args):
         args = setup(args)
     
     res = {'main_nsimult': 500,
-           'main_memory': 224000,
+           'main_memory': 120000,
            'main_time_per_index': int(np.ceil(args.num_maps_per_index*0.5)), # hours
            'main_scratch':int(1000*args.num_maps_per_index),
            'merge_memory':64000,
            'merge_time':24,
-           'pass': {'constraint': 'cpu', 'account': 'm5099', 'qos': 'shared'}
-           } # perlmutter
+           } 
 
     if args.largemem:
         res['main_memory'] = 32000
@@ -98,7 +99,7 @@ def resources(args):
     if 'CLUSTER_NAME' in os.environ:
         
         if os.environ['CLUSTER_NAME'] == 'perlmutter':
-            res['pass'] = {'constraint': 'cpu', 'qos': 'shared'}
+            res['pass'] = {'constraint': 'cpu', 'qos': 'shared', 'cpus-per-task': 32}
             res['main_nsimult'] = 200
 
         if os.environ['CLUSTER_NAME'] == 'euler':
@@ -284,13 +285,27 @@ def euclid_map_projector(index, filepath_out, variant, nside_maps, path_simulati
 
     nz_RR2 = np.load(path_nz_RR2, allow_pickle=True).item()
 
-    # -------------------------------------------------------
+    # ------------------------------------------------------- v1 reader
+    # z_rebinned = nz_RR2['z_rebinned']
+    # nz_all = nz_RR2['nz_rebinned']
+
+    # ------------------------------------------------------- v2 reader
+    nz_all = [nz_RR2['tomo_all']] + [nz_RR2[f'tomo_{i}'] for i in range(1, 7)]
+    z_rebinned = nz_RR2['z_midp']
+    
     nz_shifted, shells, steps, zeff_glass, ngal_glass = apply_nz_shifts_and_build_shells(
-        z_rebinned=nz_RR2['z_rebinned'],
-        nz_all=nz_RR2['nz_rebinned'],
+        z_rebinned=z_rebinned,
+        nz_all=nz_all,
         dz_values=sims_parameters["dz"],
         shells_info=shells_info,
     )
+    LOGGER.info(f'using redshift bins from {path_nz_RR2} with {len(z_rebinned)} bins')
+    for i, nz in enumerate(nz_all):
+        mean_z = np.sum(nz*z_rebinned)/np.sum(nz)
+        LOGGER.info(f'mean z for bin {i} = {mean_z: 2.4f}')
+
+
+
 
     # Plot -----------------------------------------------------------------
 
@@ -602,8 +617,7 @@ def arr_row_str(a):
 
 if __name__ == '__main__':
 
-    args = setup(sys.argv)
-    for result in main(args.tasks, args):
+    for result in main([0], sys.argv[1:]):
         print(result)
 
 
