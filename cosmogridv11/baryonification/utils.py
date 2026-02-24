@@ -6,7 +6,7 @@ import h5py
 from astropy.cosmology import FlatLambdaCDM, FlatwCDM
 from astropy.units import km, eV, Mpc
 from scipy.optimize import least_squares
-import os
+import os, sys
 
 from cosmogridv11 import utils_logging
 LOGGER = utils_logging.get_logger(__file__)
