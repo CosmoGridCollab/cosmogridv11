@@ -370,31 +370,14 @@ def fit_trNWF_from_enclosedMass(r_bins, M_bins, c_init, t_init, rvir_init, rho_c
     
     return least_squares(diff_func, x_init, verbose=verbose)
 
-def read_pkd_halos(file_name, rho_c, rho_c0, Lbox, part_mass, delta=200, Nmin=250, count="tot",
-                   mode="FPNFW", VP_truncate=True, preamble="", n_read_halos=-1):
+
+def read_pkd_halos(file_name, preamble='', count=-1):
+
     """
     Reads the halos from a pkd binary file and fits a NFW profile if possible
     :param file_name: The file name to read
-    :param rho_c: The critical density at the redshift of the file
-    :param rho_c0: The critical density at z=0
-    :param Lbox: The boxsize of the simulation [Mpc/h]
-    :param part_mass: The mass of a single particle [Msun/h]
-    :param delta: the overdensity criterion to define rvir and Mvir (default: 200, as in Schneider et. al)
-    :param Nmin: Minimum number of particles in a halo (further defined with count argument)
-    :param count: How to cound Nvir of the halo
-        rvir: count particles inside rvir -> leads to more aggressive masking of the halos
-        tot:  count total number of particles inside the halo
-    :param mode: What kind of measured profile to use and what type of profile to fit
-        FP: full profile, use the fixed binned mass profile to fit target halo profile
-        VP: viral profile, use the binned mass profile up to rvir to fit target halo profile
-            (assumes at least 25 parts inside the viral radius even if count is tot)
-        NFW: fit a normal NFW profile
-        TNFW: fit a truncated NFW profile
-    :param VP_truncate: If mode is VP then truncate the profile to the first bin with delta_halo < delta
-           (because of pkd profile bug)
     :param preamble: A string that is printed before each logging statement, e.g. can make the output clearer in case
     of multiple workers...
-    :param n_read_halos: How many halos to read out from the file, defaults to -1 -> read all halos
     :return: The halos in the same data format as read from an AHF file
     """
 
@@ -403,240 +386,24 @@ def read_pkd_halos(file_name, rho_c, rho_c0, Lbox, part_mass, delta=200, Nmin=25
                                ("minPot", "f4"),
                                ("rcen", ("f4", 3)),
                                ("rcom", ("f4", 3)),
-                               ("vcom", ("f4", 3)), # this is a typo, should be vcom (velocity)
+                               ("vcom", ("f4", 3)), 
                                ("angular", ("f4", 3)),
                                ("inertia", ("f4", 6)),
                                ("sigma", "f4"),
                                ("rMax", "f4"),
-                               ("fMAss", "f4"),
+                               ("fMass", "f4"),
                                ("fEnvironDensity0", "f4"),
                                ("fEnvironDensity1", "f4"),
                                ("rHalf", "f4"),
-                               ("rvir", "f4"),
+                               ("fRvir", "f4"),
                                ("profile", ('i4', 20)),
                                ("virprofile", ('i4', 20))])
     
-    out_halo_dtype = np.dtype([('ID', np.uint64),
-                               ('IDhost', np.uint64),
-                               ('Mvir', '<f8'),
-                               ('Nvir', '<i8'),
-                               ('x', '<f8'),
-                               ('y', '<f8'),
-                               ('z', '<f8'),
-                               ('rvir', '<f8'),
-                               ('cvir', '<f8'),
-                               ("vcom_x", 'f4'),
-                               ("vcom_y", 'f4'),
-                               ("vcom_z", 'f4'),
-                               ('tfNFW_cvir', '<f8'),
-                               ('tfNFW_tau', '<f8'),
-                               ('tfNFW_Mvir', '<f8')])
-
     # read the file
-    LOGGER.info(preamble + "Reading in halos from file {}...".format(file_name))
-    halo_data = np.fromfile(file_name, dtype=pkd_halo_dtype, count=n_read_halos)
-    LOGGER.info(preamble + "Succesfully read {} halos...".format(len(halo_data)))
+    halo_data = np.fromfile(file_name, dtype=pkd_halo_dtype, count=count)
+    LOGGER.info(preamble + "Successfully read {} halos from {}".format(len(halo_data), file_name))
 
-    # tipsy factor to transform masses to M_sun/h
-    tipsy_fac = rho_c0 * Lbox ** 3
-    # from tipsy mass to nparts
-    tipsy_fac /= part_mass
-
-    # now we need rho_c in M_sun h^2/kpc^3
-    rho_c /= 1e9
-
-    # from integer pos to float pos
-    int_fac = 1.0 / 0x80000000
-
-    # now we start masking, we begin with the counts
-    if count == 'tot':
-        Nparts = np.round(halo_data["fMAss"] * tipsy_fac, 0)
-    elif count == 'vir':
-        Nparts = np.sum(halo_data["virprofile"], axis=1)
-    else:
-        raise IOError(preamble + "This type of count is note supported: {}...".format(count))
-
-    mask = Nparts >= Nmin
-    halo_data = halo_data[mask]
-
-    # report on selection
-    reduction = 100 * (len(mask) - np.sum(mask)) / len(mask)
-    LOGGER.info(preamble + "Nmin reduces the number of halos by "
-              "{:5.2f}% ({} total) to {}...".format(reduction, len(mask) - np.sum(mask), len(halo_data)))
-
-    # Now we deal with viral stuff
-    if mode.startswith("VP"):
-
-        
-        # calculate the delta of the halos
-        Nvir = np.sum(halo_data["virprofile"], axis=1)
-        Mvir = Nvir / tipsy_fac
-        delta_data = Mvir / (4.0 / 3.0 * np.pi * halo_data["rvir"] ** 3)
-            
-        # take only what is close to delta and has at least 25 parts in rvir
-        mask = np.logical_and(np.isclose(delta_data, delta, atol=0.1), Nvir >= 25)
-        halo_data = halo_data[mask]
-
-        # report how many were selected
-        reduction = 100 * (len(mask) - np.sum(mask)) / len(mask)
-        LOGGER.info(preamble + "Viral profiling reduces the number of halos by {:5.2f}% ({} total) to {}...".format(reduction, len(mask) - np.sum(mask), len(halo_data)))
-
-    LOGGER.info(preamble + "Starting with profile fitting...")
-
-    # cycle though halos
-    halo_lines = []
-    halo_id = 0
-    IDhost = -1
-    n_fail_root = 0
-    n_fail_small = 0
-    for index, halo in LOGGER.progressbar(list(enumerate(halo_data)), at_level='info', desc=f'profiling halos with mode={mode}'):
-
-        # get some params
-        if mode.startswith("VP"):
-            # count parts inside viral radius
-            Nvir = np.sum(halo["virprofile"])
-            # bins up to rvir
-            r_bin = np.logspace(np.log(0.005 * 3), np.log(halo["rvir"] * Lbox), 20, base=np.e) * 1000
-        
-        else:
-            # get the number of particles (as int)
-            Nvir = int(np.round(halo["fMAss"] * tipsy_fac, 0))
-            # fixed bins
-            r_bin = np.logspace(np.log(0.005 * 3), np.log(5.0), 20, base=np.e) * 1000
-
-        # set the halo id
-        ID = halo_id
-        halo_id += 1
-
-        # position of the halos in kpc/h
-        pos = 1000 * Lbox * (halo["rPot"] * int_fac + halo["rcen"] + 0.5)
-        x = pos[0]
-        y = pos[1]
-        z = pos[2]
-
-        # truncate the pkd profile
-        if mode.startswith("VP"):
-            
-            if VP_truncate:
-                
-                # we truncate to the first bin where delta_halo < delta - 1 (and truncate zeros...)
-                profile_parts = truncate_zeros(halo["virprofile"])
-                binned_crit = 4.0 / 3.0 * np.pi * (r_bin[:len(profile_parts)]) ** 3 * rho_c
-                enclosed_delta = np.cumsum(profile_parts) * part_mass / binned_crit
-                part_list = []
-                for n_p, e_d in zip(profile_parts, enclosed_delta):
-                    if e_d <= delta - 1:
-                        part_list.append(n_p)
-                        break
-                    else:
-                        part_list.append(n_p)
-
-                profile_parts = np.array(part_list)
-
-                if count == 'vir' and np.sum(profile_parts) < Nmin:
-                    LOGGER.debug("Unable to fit a profile to halo with id "
-                              "{} because of Nmin with VP_truncate and vir counting, skipping...".format(ID))
-                    continue
-                
-                if count == 'tot' and np.sum(profile_parts) < 25:
-                    LOGGER.debug("Unable to fit a profile to halo with id "
-                              "{} because of Nmin with VP_truncate and tot counting, skipping...".format(ID))
-                    continue
-            else:
-                
-                profile_parts = truncate_zeros(halo["virprofile"])
-        else:
-            
-            profile_parts = truncate_zeros(halo["profile"])
-        
-        enclosed_mass = np.cumsum(profile_parts) * part_mass
-
-        # fit
-        if mode.endswith("TNFW"):
-            
-            res = fit_trNWF_from_enclosedMass(r_bin[:len(enclosed_mass)], enclosed_mass,
-                                              c_init=6, t_init=4 * 6, rvir_init=500, rho_c=rho_c, verbose=0)
-
-            # Mvir from TNFW is not really Mvir (see https://arxiv.org/pdf/1101.0650.pdf)
-            # so we still need to find Mvir (or rvir in this case)
-            fitted_enclosed_mass = lambda r: MNFWtr_fct(res["x"], r, rho_c)
-
-            # params to save
-            tr_cvir = np.abs(res["x"][0])
-            tr_tau = np.abs(res["x"][1])
-            tr_Mvir = np.abs(4.0 / 3.0 * res["x"][2] ** 3 * 200 * rho_c)
-
-            # get rvir
-            f_root = lambda R: fitted_enclosed_mass(R) / (4.0 / 3.0 * np.pi * R ** 3 * rho_c) - delta
-
-            # rvir from TNW as rvir init
-            r_init = res["x"][2]
-
-        else:
-            
-            # fit the profile
-            res = fit_NWF_from_enclosedMass(r_bin[:len(enclosed_mass)], enclosed_mass,
-                                            rhos_init=1e7, rs_init=100, verbose=0)
-            if not res["success"]:
-                LOGGER.debug("Unable to fit a profile to halo with id {} because of least square fail, "
-                          "skipping...".format(ID))
-                continue
-
-            # function for the enclosed mass
-            fitted_params = res["x"]
-            fitted_enclosed_mass = lambda r: 4 * np.pi * fitted_params[0] * fitted_params[1] ** 3 * \
-                                             (np.log((fitted_params[1] + r) / fitted_params[1]) - r / (
-                                                         fitted_params[1] + r))
-
-            # params to save
-            tr_cvir = -1.0
-            tr_tau = -1.0
-            tr_Mvir = -1.0
-
-            # get rvir
-            f_root = lambda R: fitted_enclosed_mass(R) / (4.0 / 3.0 * np.pi * R ** 3 * rho_c) - delta
-
-            # rs as rvir init
-            r_init = fitted_params[1]
-
-        # binary search
-        r_low = 0.01 * r_init
-        f_low = f_root(r_low)
-        r_high = 100.0 * r_init
-        f_high = f_root(r_high)
-
-        try:
-            rvir, fvir = binary_root_finder(f_root, r_low, r_high, f_low, f_high)
-            if index % 100 == 0:
-                pkd_rvir = halo["rvir"] * Lbox * 1000
-                LOGGER.debug(preamble + "Halo ID {:>8d}, PKD rvir {:5.2f},  NFW rvir {:5.2f}, Diff {:5.2f} ".format(ID, pkd_rvir, rvir, (pkd_rvir-rvir)/rvir*100))
-            # LOGGER.debug(preamble + "Halo ID:  {}".format(ID))
-            # LOGGER.debug(preamble + "PKD rvir: {}".format(halo["rvir"] * Lbox * 1000))
-            # LOGGER.debug(preamble + "NFW rvir: {}".format(rvir))
-            # LOGGER.debug(preamble + "Diff:     {}".format(100 * (halo["rvir"] * Lbox * 1000 - rvir) / rvir, "%"))
-        
-        except Exception as err:
-            n_fail_root += 1
-            LOGGER.debug(preamble + "Halo ID {:>8d}, unable to fit a profile to halo because of rvir root finder fail, errmsg={} skipping...".format(ID, str(err)))
-            continue
-
-        # calculate the other params
-        Mvir = 4.0 / 3.0 * np.pi * rvir ** 3 * rho_c * delta
-
-        # less than 1e12 Msun/h is unsensible and leads to a negative fraction of satelite galaxies
-        if Mvir < 1e12:
-            n_fail_small += 1
-            LOGGER.debug(preamble + "Halo ID {:>8d}, unable to fit a profile to halo with id because of Mvir too small, skipping...".format(ID))
-            continue
-
-        cvir = -1.0 if mode.endswith("TNFW") else rvir / r_init
-
-        # append the date
-        halo_lines.append((ID, IDhost, Mvir, Nvir, x, y, z, rvir, cvir, halo['vcom'][0], halo['vcom'][1], halo['vcom'][2], tr_cvir, tr_tau, tr_Mvir))
-
-    LOGGER.info(preamble + "Finished fitting halos in file {}, fitted {}/{} halos, n_fail_small={}, n_fail_root={}".format(file_name, len(halo_lines), len(halo_data), n_fail_small, n_fail_root))
-
-    return np.array(halo_lines, dtype=out_halo_dtype)
+    return halo_data
 
 
 def get_halofiles_from_z_boundary(z_boundaries, log_file, prefix):
