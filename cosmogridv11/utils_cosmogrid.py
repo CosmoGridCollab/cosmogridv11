@@ -72,7 +72,7 @@ def get_simulations_list(set_type='all'):
 
     simslist = metainfo[f'simulations/{set_type}']
     parslist = metainfo[f'parameters/{set_type}']
-    shell_info = {ensure_endswith(x[0]):x[1] for x in filter(lambda x: ensure_endswith(x[0]) in metainfo[f'parameters/{set_type}']['path_par'], metainfo['shell_info'].items())}
+    shell_info = {str(ensure_endswith(x[0])):x[1] for x in filter(lambda x: ensure_endswith(x[0]) in metainfo[f'parameters/{set_type}']['path_par'], metainfo['shell_info'].items())}
 
     LOGGER.info('loaded raw CosmoGrid metainfo table ' + fpath)
 
