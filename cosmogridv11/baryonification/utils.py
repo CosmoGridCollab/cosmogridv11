@@ -485,6 +485,25 @@ def dequantize_pkd_halos(halo_data, Lbox, rho_c0, part_mass, preamble=''):
 
     return halo_data
 
+def dequantize_halo_pos(rPot, rcen, Lbox):
+
+    # from integer pos to float pos
+    int_fac = 1.0 / 0x80000000
+    pos = 1000 * Lbox * (rPot * int_fac + rcen + 0.5)
+    return pos
+
+
+
+def get_tipsy_fac(rho_c0, Lbox, part_mass):
+
+    # tipsy factor to transform masses to M_sun/h
+    tipsy_fac = rho_c0 * Lbox ** 3
+    # from tipsy mass to nparts
+    tipsy_fac /= part_mass
+
+    return tipsy_fac
+
+
 def load_baryonification_params(fname):
 
     from cosmogridv11 import baryonification
