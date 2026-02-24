@@ -10,10 +10,10 @@ import io, os, sys, warnings, argparse, h5py, numpy as np, time, logging, iterto
 import healpy as hp
 from glob import glob
 from tqdm import tqdm, trange
-from cosmogridv1 import utils_logging, utils_io, utils_arrays, utils_cosmogrid, utils_config, utils_maps, utils_shells
-from cosmogridv1.baryonification import utils as utils_bary
-from cosmogridv1.copy_guardian import NoFileException
-from cosmogridv1.filenames import *
+from cosmogridv11 import utils_logging, utils_io, utils_arrays, utils_cosmogrid, utils_config, utils_maps, utils_shells
+from cosmogridv11.baryonification import utils as utils_bary
+from cosmogridv11.copy_guardian import NoFileException
+from cosmogridv11.filenames import *
 
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=RuntimeWarning)
