@@ -50,7 +50,11 @@ def read_cosmogrid_metainfo(fpath):
     return metainfo
 
 
-
+def ensure_endswith(s, x='/'):
+    
+    if not s.endswith(x):
+        s += x
+    return s
 
 def get_simulations_list(set_type='all'):
     """
@@ -58,12 +62,6 @@ def get_simulations_list(set_type='all'):
     :return simslist_fiducial: simulations list
     :return parslist_fiducial: input parameters list
     """
-
-    def ensure_endswith(s, x='/'):
-        if not s.endswith(x):
-            s += x
-        return s
-
 
     # get simulation list
     dir_resources = os.path.join(os.path.dirname(__file__), '..', 'resources')
@@ -102,7 +100,7 @@ def get_baryonified_simulations_list(conf, set_type='all'):
     # select set
     simslist = metainfo[f'simulations/{set_type}']
     parslist = metainfo[f'parameters/{set_type}']
-    shell_info = {x[0]:x[1] for x in filter(lambda x: x[0] in metainfo[f'parameters/{set_type}']['path_par'], metainfo['shell_info'].items())}
+    shell_info = {str(ensure_endswith(x[0])):x[1] for x in filter(lambda x: ensure_endswith(x[0]) in metainfo[f'parameters/{set_type}']['path_par'], metainfo['shell_info'].items())}
 
     return simslist, parslist, shell_info
 
