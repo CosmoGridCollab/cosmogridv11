@@ -718,5 +718,18 @@ def dequantize_pkd_halos(halo_data, Lbox, rho_c0, part_mass, preamble=''):
 
     return halo_data
 
+def load_baryonification_params(fname):
+
+    from cosmogridv11 import baryonification
+    sys.path.append(os.path.join(baryonification.__path__[0], '..')) # this is for back-compat with baryonification_params.py scripts
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("baryonification_params.py", fname)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["baryonification_params.py"] = mod
+    spec.loader.exec_module(mod)
+    LOGGER.info(f'using baryonification_params={mod}')
+    return mod.par
+
+
 
 
