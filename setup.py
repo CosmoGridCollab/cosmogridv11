@@ -16,7 +16,7 @@ test_requirements = [ ]
 
 setup(
     author="Tomasz Kacprzak",
-    author_email='tomasz.kacprzak@psi.ch',
+    author_email='tomasz.kacprzak@fhnw.ch',
     python_requires='>=3.6',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
