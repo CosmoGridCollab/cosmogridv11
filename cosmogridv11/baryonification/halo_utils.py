@@ -1071,6 +1071,81 @@ def add_halo_id(h, i_file):
 
 
 
+def box_replicate_shell_halos_to_lightcone(h, param, cov_lims, i_file, max_repli, preamble=''):
+
+    # get the positions and transform
+    halos = np.array([h["x"], h["y"], h["z"]]).T/1000.0  # to Mpc
+    cov_inner, cov_outer = cov_lims
+
+    # copy the halo lines
+    halo_lines = utils_arrays.add_cols(h, names=['shell_id:u4', 'halo_buffer:i1'])
+
+    assert len(halo_lines) == len(halos), preamble + "There seems to be something wrong with the halo file, more than one comment on top?"
+
+    # get the offset indices
+    offset_indices = get_offset_indices(boxsize=param.sim.Lbox, min_val=cov_inner, max_val=cov_outer, max_repli=max_repli)
+
+    # cycle and project
+    old_offset = np.zeros(3)
+
+    # select all relevant halos
+    N_tot = 0
+    relevant_lines = []
+    for offset in offset_indices:
+        
+        # get the new offset and add to positions
+        mpc_offset = (offset - old_offset) * param.sim.Lbox
+        halos += mpc_offset
+
+        # update halos
+        halo_lines['x'] += mpc_offset[0] * 1000
+        halo_lines['y'] += mpc_offset[1] * 1000
+        halo_lines['z'] += mpc_offset[2] * 1000
+
+        # update
+        old_offset = offset
+
+        # convert to radii
+        radii = np.linalg.norm(halos, axis=1)
+
+        # get the masks
+        # mask_inner = np.abs(radii - cov_inner) < param.code.halo_buffer # this is buggy as it selects halos inside the shell too
+        # mask_middle = np.logical_and(radii >= cov_inner, radii < cov_outer) # this is buggy as it selects halos inside the shell too
+        # mask_outer = np.abs(radii - cov_outer) < param.code.halo_buffer # this is buggy as it selects halos inside the shell too
+        mask_inner = (radii > cov_inner - param.code.halo_buffer) & (radii < cov_inner)
+        mask_middle = (radii >= cov_inner) & (radii < cov_outer)
+        mask_outer = (radii < cov_outer + param.code.halo_buffer) & (radii > cov_outer)
+
+        n_pass = np.sum(mask_inner) + np.sum(mask_middle) + np.sum(mask_outer)
+        N_tot += n_pass
+        LOGGER.debug(preamble + "Current offset: {:>10s}, Total number of collected halos: {}/{}".format(str(offset), N_tot, len(halos)))
+
+        # if there are no halos in the shell do nothing
+        if n_pass == 0:
+            continue
+
+        # get what is relevant + shell id
+        for id_offset, mask in zip([-1, 0, 1], [mask_inner, mask_middle, mask_outer]):
+            local_pass = np.sum(mask)
+            if local_pass > 0:
+
+                relevant = np.copy(halo_lines[mask])
+                relevant['shell_id'] = i_file + id_offset
+                relevant['halo_buffer'] = id_offset
+                # extended_halo_dtype = halo_lines.dtype.descr + [("shell_id", np.uint16), ("halo_buffer", np.int8)]
+                # relevant = np.zeros(local_pass, dtype=extended_halo_dtype)
+                # relevant["shell_id"] = i_file + id_offset
+                # relevant["halo_buffer"] = id_offset
+                # masked_lines = halo_lines[mask]
+                # for name in halo_lines.dtype.names:
+                #     # if name != "shell_id":
+                #     relevant[name] = masked_lines[name]
+                relevant_lines.append(relevant)
+
+    h_shell = np.concatenate(relevant_lines) if len(relevant_lines) > 0 else np.array([], dtype=halo_lines.dtype)
+
+    return h_shell
+
 
 
 
