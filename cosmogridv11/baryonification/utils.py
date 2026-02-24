@@ -516,6 +516,45 @@ def load_baryonification_params(fname):
     LOGGER.info(f'using baryonification_params={mod}')
     return mod.par
 
+def get_offset_indices(boxsize, min_val, max_val, max_repli=7):
+    """
+    Gets all indices that intersect with a given shell
+    :param boxsize: Size of the box
+    :param min_val: inner radius of the shell
+    :param max_val: outer radius of the shell
+    :param max_repli: maximum number of replicates per side
+    :return: a list of np.array([i,j,k]) arrays with the offset indices
+    """
+
+    assert max_repli > 0, "Number of replciates has to be bigger than 0"
+
+    # list for indices
+    box_indices = []
+
+    # cycle through all boxes
+    for i in range(-max_repli, max_repli):
+        for j in range(-max_repli, max_repli):
+            for k in range(-max_repli, max_repli):
+                # set the origin
+                origin = np.array([i, j, k])*boxsize
+                # check all the corners
+                corners = np.zeros((8, 3))
+                corner_index = 0
+                for ii in range(2):
+                    for jj in range(2):
+                        for kk in range(2):
+                            # set corner offset
+                            corner_offset = np.array([ii, jj, kk])*boxsize
+                            # set corner
+                            corners[corner_index] = origin + corner_offset
+                            # update
+                            corner_index += 1
+                # check
+                check_box = check_points(corners, min_val, max_val)
+                if check_box:
+                    box_indices.append(np.array([i,j,k]))
+
+    return box_indices
 
 
 
