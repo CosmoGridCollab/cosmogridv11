@@ -1060,6 +1060,14 @@ def get_particle_mass(cosmo, Lbox, nparts):
 
 
 
+def add_halo_id(h, i_file):
+
+    h = utils_arrays.add_cols(h, names=['ID:u8'])
+
+    # update the ids
+    h["ID"] = np.arange(len(h)) + i_file*10**8
+
+    return h
 
 
 
