@@ -1039,6 +1039,14 @@ def mpc_to_gpc(rec, fields):
     return rec
 
 
+def get_rho_c_for_z(cosmo, z):
+
+    from astropy.units import Mpc, Msun
+
+    rho_c = cosmo.critical_density(z).to(cosmo.h ** 2 * Msun / Mpc ** 3).value
+
+    return rho_c
+
 
 
 
