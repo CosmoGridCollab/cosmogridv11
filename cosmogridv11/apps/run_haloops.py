@@ -171,8 +171,8 @@ def main(indices, args):
     for index in indices:
 
         sim_current = simslist_all[index]
-        path_sim_bary = sim_current['path_sim']
-        path_par_bary = sim_current['path_par']
+        path_sim_bary = str(sim_current['path_sim'])
+        path_par_bary = str(sim_current['path_par'])
         path_sim_raw = path_sim_bary.replace('CosmoGrid/bary/', f'CosmoGrid/raw/')
         path_par_raw = path_par_bary.replace('CosmoGrid/bary/', f'CosmoGrid/raw/')
         shell_info = shell_info_all[path_par_bary]
