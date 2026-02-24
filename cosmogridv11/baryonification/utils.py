@@ -8,7 +8,7 @@ from astropy.units import km, eV, Mpc
 from scipy.optimize import least_squares
 import os, sys
 
-from cosmogridv11 import utils_logging
+from cosmogridv11 import utils_logging, utils_arrays
 LOGGER = utils_logging.get_logger(__file__)
 
 def build_cosmo(param, verbosity=0):
