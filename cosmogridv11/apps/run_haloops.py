@@ -141,7 +141,8 @@ def load_sim_baryparams(filename_params_local, sim):
 
     pars = ['Mc', 'eta_cga', 'eta_tot', 'mu', 'nu', 'thco', 'thej']
     for p in pars:
-        setattr(params_bary.baryon, p, sim[f'bary_{p}'])
+        if f'bary_{p}' in sim.dtype.names:
+            setattr(params_bary.baryon, p, sim[f'bary_{p}'])
     
     print_baryon_params(params_bary)
     
