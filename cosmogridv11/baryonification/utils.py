@@ -694,3 +694,29 @@ def match_shell(shell_info, halo_shell):
         raise ValueError(f"Upper and lower index do not match: {upper_index} vs {lower_index}")
 
     return lower_index
+    
+def dequantize_pkd_halos(halo_data, Lbox, rho_c0, part_mass, preamble=''):
+    """
+    :param halo_data: rec array output of function read_pkd_halos
+    :param rho_c0: The critical density at z=0
+    :param part_mass: The mass of a single particle [Msun/h]
+    :param Lbox: The boxsize of the simulation [Mpc/h]
+    # add position and unique id
+    :return: The input halo_data with additional columns contains dequantized quantities [x, y, z, mass, rvir]
+    """
+
+    pos = dequantize_halo_pos(halo_data["rPot"], halo_data["rcen"], Lbox)
+    halo_data = utils_arrays.add_cols(halo_data, names=['x:f4', 'y:f4', 'z:f4'])
+    halo_data['x'] = pos[:,0]
+    halo_data['y'] = pos[:,1]
+    halo_data['z'] = pos[:,2]
+
+    tipsy_fac = get_tipsy_fac(rho_c0, Lbox, part_mass)
+    halo_data = utils_arrays.add_cols(halo_data, names=['mass:f8', 'rvir:f4'])
+    halo_data['mass'] = np.round(halo_data["fMass"] * tipsy_fac, 0) * part_mass
+    halo_data['rvir'] = halo_data["fRvir"] * Lbox
+
+    return halo_data
+
+
+
