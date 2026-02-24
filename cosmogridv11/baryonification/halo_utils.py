@@ -1048,9 +1048,15 @@ def get_rho_c_for_z(cosmo, z):
     return rho_c
 
 
+def get_particle_mass(cosmo, Lbox, nparts):
 
+    from astropy.units import Mpc, Msun
 
+    rho_crit = cosmo.critical_density(0).to(cosmo.h ** 2 * Msun / Mpc ** 3).value
+    part_mass = cosmo.Om0 * rho_crit
+    part_mass *= (Lbox / nparts) ** 3
 
+    return part_mass
 
 
 
