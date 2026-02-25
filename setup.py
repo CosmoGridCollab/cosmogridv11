@@ -10,7 +10,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [ 'hmf==3.3.3', 'halomod=2.0.0', 'healpy', 'tqdm', 'h5py', 'numba' ]
+requirements = [ 'hmf==3.3.3', 'halomod==2.0.0', 'healpy', 'tqdm', 'h5py', 'numba' ]
 
 test_requirements = [ ]
 
