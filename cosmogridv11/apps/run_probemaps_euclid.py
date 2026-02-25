@@ -204,15 +204,21 @@ def project_single_sim(index, args, conf):
 
         LOGGER.info(f'==============> maps for variant={variant}')
         
-        euclid_map_projector(index,
-                             dirpath_out,
-                             variant,
-                             nside_maps=1024, 
-                             path_simulations=os.path.join(conf['paths']['cosmogrid_bary'].rstrip('CosmoGrid/bary/'), sim_current['path_sim']), 
-                             path_meta=conf['paths']['metainfo_bary'], 
-                             path_SC_corrections=os.path.join(LSS_forward_model.__path__[0], '../Data/SC_RR2_fit_nov6.npy'), 
-                             path_nz_RR2=conf['paths']['redshifts_euclid'], 
-                             path_data_cats=conf['paths']['data_cats_euclid'])
+        file_out = euclid_map_projector(index,
+                                        dirpath_out,
+                                        variant,
+                                        nside_maps=1024, 
+                                        path_simulations=os.path.join(conf['paths']['cosmogrid_bary'].rstrip('CosmoGrid/bary/'), sim_current['path_sim']), 
+                                        path_meta=conf['paths']['metainfo_bary'], 
+                                        path_SC_corrections=os.path.join(LSS_forward_model.__path__[0], '../Data/SC_RR2_fit_nov6.npy'), 
+                                        path_nz_RR2=conf['paths']['redshifts_euclid'], 
+                                        path_data_cats=conf['paths']['data_cats_euclid'])
+
+        files_variants.append(file_out)
+
+    return files_variants
+
+            
 
 
 def euclid_map_projector(index, dirpath_out, variant, nside_maps, path_simulations, path_meta, path_SC_corrections, path_nz_RR2, path_data_cats, plots=False):
@@ -381,6 +387,8 @@ def euclid_map_projector(index, dirpath_out, variant, nside_maps, path_simulatio
 
     # store 
     store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance_parameters, ngal_glass, cosmo_bundle, nside_maps)
+
+    return filepath_out
     
 
     
@@ -504,6 +512,8 @@ def store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance
 
 
     LOGGER.info(f'stored maps to {filepath_out}')
+
+    return [filepath_out]
     
 
 
@@ -604,6 +614,12 @@ def arr_row_str(a):
     for k in a.dtype.names:
         s += f'{k}={str(a[k]):>4s} '
     return s
+
+if __name__ == '__main__':
+
+    args = setup(sys.argv)
+    for result in main(args.tasks, args):
+        print(result)
 
 
 
