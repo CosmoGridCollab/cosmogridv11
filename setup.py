@@ -10,13 +10,13 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [ ]
+requirements = [ 'hmf==3.3.3', 'halomod=2.0.0', 'healpy', 'tqdm', 'h5py', 'numba' ]
 
 test_requirements = [ ]
 
 setup(
     author="Tomasz Kacprzak",
-    author_email='tomasz.kacprzak@psi.ch',
+    author_email='tomasz.kacprzak@fhnw.ch',
     python_requires='>=3.6',
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

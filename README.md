@@ -28,7 +28,10 @@ There is a number of apps that can be used to accomplish consecutive stages of p
     The resulting output file will be `CosmoGridV11_bary_{tag}_metainfo.h5`, where `{tag}` is the entry in the config under `baryonification/tag:`.
     After the file is created, make sure to include it in the config under `paths/metainfo_bary:`, for later use.
 
-    1.2 Displace shells using the halocone:      
+    1.2 Optionally, create profiled halo catalog:
+    ``python -m cosmogridv11.apps.run_haloops profile_halos  --config=config_v11.yaml  --help``     
+    
+    1.3 Displace shells using the halocone:      
     ``python -m cosmogridv11.apps.run_haloops baryonify_shells  --config=config_v11.yaml  --help``     
 
 3)  Create projected probe maps      

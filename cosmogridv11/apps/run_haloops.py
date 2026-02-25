@@ -10,10 +10,10 @@ import io, os, sys, warnings, argparse, h5py, numpy as np, time, logging, iterto
 import healpy as hp
 from glob import glob
 from tqdm import tqdm, trange
-from cosmogridv1 import utils_logging, utils_io, utils_arrays, utils_cosmogrid, utils_config, utils_maps, utils_shells
-from cosmogridv1.baryonification import utils as utils_bary
-from cosmogridv1.copy_guardian import NoFileException
-from cosmogridv1.filenames import *
+from cosmogridv11 import utils_logging, utils_io, utils_arrays, utils_cosmogrid, utils_config, utils_maps, utils_shells
+from cosmogridv11.baryonification import utils as utils_bary
+from cosmogridv11.copy_guardian import NoFileException
+from cosmogridv11.filenames import *
 
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=RuntimeWarning)
@@ -141,7 +141,8 @@ def load_sim_baryparams(filename_params_local, sim):
 
     pars = ['Mc', 'eta_cga', 'eta_tot', 'mu', 'nu', 'thco', 'thej']
     for p in pars:
-        setattr(params_bary.baryon, p, sim[f'bary_{p}'])
+        if f'bary_{p}' in sim.dtype.names:
+            setattr(params_bary.baryon, p, sim[f'bary_{p}'])
     
     print_baryon_params(params_bary)
     
@@ -171,8 +172,8 @@ def main(indices, args):
     for index in indices:
 
         sim_current = simslist_all[index]
-        path_sim_bary = sim_current['path_sim']
-        path_par_bary = sim_current['path_par']
+        path_sim_bary = str(sim_current['path_sim'])
+        path_par_bary = str(sim_current['path_par'])
         path_sim_raw = path_sim_bary.replace('CosmoGrid/bary/', f'CosmoGrid/raw/')
         path_par_raw = path_par_bary.replace('CosmoGrid/bary/', f'CosmoGrid/raw/')
         shell_info = shell_info_all[path_par_bary]
@@ -277,7 +278,7 @@ def get_indices(tasks):
 
 def create_shell_table(cosmo, shell_z):
 
-    from cosmogridv1.baryonification.halo_utils import get_shell_cov_dist
+    from cosmogridv11.baryonification.halo_utils import get_shell_cov_dist
 
     # a list for the shell file
     shell_dtype = np.dtype([("shell_id", np.uint16),
@@ -375,7 +376,7 @@ def store_halocone(conf, shell_info, params_bary, filename_out, test=False):
     This file creates a HaloCone from a CosmoGrid simulation.
     """
 
-    from cosmogridv1 import baryonification
+    from cosmogridv11 import baryonification
 
     # get redshift bounds
     z_bounds = np.stack([shell_info['lower_z'], shell_info['upper_z']], axis=1)
@@ -420,7 +421,7 @@ def store_v11_halos(param, halo_files, shells_z, filename_out, max_repli=7, test
     :return: name of the written file
     """
 
-    from cosmogridv1.baryonification import halo_utils
+    from cosmogridv11.baryonification import halo_utils
 
     # check for consitency
     assert len(halo_files) == len(shells_z), "Halo file and boundaries need to match in first dimension"
@@ -474,7 +475,7 @@ def store_v11_halos(param, halo_files, shells_z, filename_out, max_repli=7, test
 
 def get_v11_halos_for_shell(cosmo, param, ind_shell, halos, shell, part_mass, rho_c0, max_repli=7, test=False):
 
-    from cosmogridv1.baryonification import halo_utils
+    from cosmogridv11.baryonification import halo_utils
 
     # get basic parameters
     z_shell = (shell['lower_z']+shell['upper_z'])/2.
@@ -806,7 +807,7 @@ def baryonify_shells(conf, filename_halocone, filename_shells, filename_shells_o
     This script baryonifies the compressed shells of a CosmoGrid simulation given a HaloCone and parameters
     """
 
-    from cosmogridv1.baryonification import halo_utils
+    from cosmogridv11.baryonification import halo_utils
 
     # decide the type of baryonification to perform
     use_mc_relation = True if 'v11' in conf['baryonification']['tag'] else False
@@ -936,7 +937,7 @@ def store_baryonified_shells(filename_out, baryon_shells, particle_shells, shell
 def create_baryonification_info_file(fname_out, shell_infos, param):
 
     # accumulate stats
-    from cosmogridv1.baryonification.utils import bunch_to_lists
+    from cosmogridv11.baryonification.utils import bunch_to_lists
 
     # create the info file
     with open(fname_out, "w+") as f:
