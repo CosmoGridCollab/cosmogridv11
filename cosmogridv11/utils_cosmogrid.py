@@ -71,7 +71,12 @@ def get_simulations_list(set_type='all'):
 
     simslist = metainfo[f'simulations/{set_type}']
     parslist = metainfo[f'parameters/{set_type}']
-    shell_info = {str(ensure_endswith(x[0])):x[1] for x in filter(lambda x: ensure_endswith(x[0]) in metainfo[f'parameters/{set_type}']['path_par'], metainfo['shell_info'].items())}
+
+    use_slashes = list(metainfo['shell_info'].keys())[0].endswith('/')
+    if use_slashes:
+        shell_info = {str(ensure_endswith(x[0])):x[1] for x in filter(lambda x: ensure_endswith(x[0]) in metainfo[f'parameters/{set_type}']['path_par'], metainfo['shell_info'].items())}
+    else:
+        shell_info = {str(x[0].rstrip('/')):x[1] for x in filter(lambda x: x[0].rstrip('/') in metainfo[f'parameters/{set_type}']['path_par'], metainfo['shell_info'].items())}
 
     LOGGER.info('loaded raw CosmoGrid metainfo table ' + fpath)
 
@@ -100,7 +105,13 @@ def get_baryonified_simulations_list(conf, set_type='all'):
     # select set
     simslist = metainfo[f'simulations/{set_type}']
     parslist = metainfo[f'parameters/{set_type}']
-    shell_info = {str(ensure_endswith(x[0])):x[1] for x in filter(lambda x: ensure_endswith(x[0]) in metainfo[f'parameters/{set_type}']['path_par'], metainfo['shell_info'].items())}
+
+    use_slashes = list(metainfo['shell_info'].keys())[0].endswith('/')
+    if use_slashes:
+        shell_info = {str(ensure_endswith(x[0])):x[1] for x in filter(lambda x: ensure_endswith(x[0]) in metainfo[f'parameters/{set_type}']['path_par'], metainfo['shell_info'].items())}
+    else:
+        shell_info = {str(x[0].rstrip('/')):x[1] for x in filter(lambda x: x[0].rstrip('/') in metainfo[f'parameters/{set_type}']['path_par'], metainfo['shell_info'].items())}
+
 
     return simslist, parslist, shell_info
 
