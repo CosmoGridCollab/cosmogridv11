@@ -1,10 +1,3 @@
-# Copyright (C) 2020 ETH Zurich, Institute for Particle Physics and Astrophysics
-
-"""
-Created June 2022
-author: Tomasz Kacprzak
-"""
-
 import os, warnings, argparse, h5py, numpy as np, time
 from cosmogridv11 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_shells, utils_maps, utils_projection
 from cosmogridv11.filenames import *
