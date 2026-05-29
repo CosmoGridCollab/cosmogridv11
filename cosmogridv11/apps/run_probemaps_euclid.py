@@ -1,10 +1,3 @@
-# Copyright (C) 2020 ETH Zurich, Institute for Particle Physics and Astrophysics
-
-"""
-Created June 2022
-author: Tomasz Kacprzak
-"""
-
 import os, warnings, argparse, h5py, numpy as np, time
 from cosmogridv11 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_shells, utils_maps, utils_projection
 from cosmogridv11.filenames import *
@@ -353,7 +346,7 @@ def euclid_map_projector(index, filepath_out, variant, nside_maps, path_simulati
     # Theory checks
     LOGGER.info('computing theory')
     theory = LimberTheory(cosmo_bundle['pars_camb'], lmax=4000, nonlinear="euclidemu")  # "euclidemu" | "mead" | "halofit"
-    theory.set_Wshear(np.vstack([nz_RR2['z_rebinned'],nz_shifted]).T)
+    theory.set_Wshear(np.vstack([z_rebinned, nz_shifted]).T)
     Cgg = theory.cl_gg(nonlinear=True)
 
     LOGGER.info('integrating kappa')
@@ -395,7 +388,10 @@ def euclid_map_projector(index, filepath_out, variant, nside_maps, path_simulati
     maps_WL, cat_WL = make_WL_sample(ngal_glass, zeff_glass, cosmo_bundle, sims_parameters, nside_maps, fields, cats_Euclid, 
                                                  SC_corrections=SC_corrections, 
                                                  do_catalog=False, 
-                                                 include_SC=True)
+                                                 include_SC=True,
+                                                 store_full_sky_noise_free=True)
+
+    # import pudb; pudb.set_trace()
 
 
     # store 
@@ -417,70 +413,72 @@ def store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance
     select = np.zeros(len(hp_indices), dtype=bool)
     for sample_name, sample_data in maps_WL.items():
         for field_name, field_data in sample_data.items():
+            if field_name.endswith('_tot'):
+                continue
             select |= (field_data != 0)
     hp_indices = hp_indices[select]
     LOGGER.info(f'selected {sum(select)}/{len(select)} pixels')
     
+    def create_map_dset(f, name, data):
+        LOGGER.info(f'storing {name} shape={data.shape}')
+        f.create_dataset(name=name, data=data, compression="gzip", compression_opts=4, shuffle=True)
+        f[name].attrs['nside'] = nside_maps
+
+    def create_dset(f, name, data):
+        LOGGER.info(f'storing {name} shape={data.shape}')
+        f.create_dataset(name=name, data=data, compression="gzip", compression_opts=4, shuffle=True)
 
 
     with h5py.File(filepath_out, 'w') as f:
 
         LOGGER.info(f'storing hp_indices')
-        f.create_dataset(name='hp_indices', data=hp_indices, shuffle=True, compression="gzip", compression_opts=4)
-        f['hp_indices'].attrs['nside'] = nside_maps
-
-        LOGGER.info('storing maps')
+        create_map_dset(f, 'hp_indices', hp_indices)
+                
         if maps_WL is not None:
-
+            LOGGER.info('storing maps')
             for sample_name, sample_data in maps_WL.items():
                 for field_name, field_data in sample_data.items():
                     dset = f'maps_WL/{sample_name}/{field_name}'
-                    LOGGER.debug(f'storing {dset}')
-                    f.create_dataset(name=dset, data=field_data[hp_indices], shuffle=True, compression="gzip", compression_opts=4)
-
-        LOGGER.info('storing catalog')
+                    if field_name.endswith('_tot'):
+                        create_map_dset(f, dset, field_data)
+                    else:
+                        create_map_dset(f, dset, field_data[hp_indices])
+        
+        if kappa_tomo is not None:
+            LOGGER.info('storing kappa_tomo full sky')
+            for i, kappa in enumerate(kappa_tomo):
+                dset = f'kappa_tomo/{i}'
+                create_map_dset(f, dset, kappa)
+        
         if cat_WL is not None:
-
+            LOGGER.info('storing catalog')
             for sample_name, sample_data in cat_WL.items():
                 for field_name, field_data in sample_data.items():
                     dset = f'cat_WL/{sample_name}/{field_name}'
-                    LOGGER.debug(f'storing {dset}')
-                    f.create_dataset(name=dset, data=field_data[hp_indices], shuffle=True, compression="gzip", compression_opts=4)
-
-        LOGGER.info('storing kappa_tomo')
-        if kappa_tomo is not None:
-            for i, kappa in enumerate(kappa_tomo):
-                dset = f'kappa_tomo/{i}'
-                LOGGER.debug(f'storing {dset}')
-                f.create_dataset(name=dset, data=kappa[hp_indices], shuffle=True, compression="gzip", compression_opts=4)
+                    create_dset(f, dset, field_data)
                 
         if Cls is not None:
             LOGGER.info('storing Cls_sim')
             for i, Cl in enumerate(Cls):
                 dset = f'Cls_sim/{i}'
-                LOGGER.debug(f'storing {dset}')
-                f.create_dataset(name=dset, data=Cl, shuffle=True, compression="gzip", compression_opts=4)
+                create_dset(f, dset, Cl)
 
         if Cgg is not None:
             LOGGER.info('storing Cls_theory')
             for i, Cl in enumerate(Cgg):
                 dset = f'Cls_theory/{i}'
-                LOGGER.debug(f'storing {dset}')
-                f.create_dataset(name=dset, data=Cl[i], shuffle=True, compression="gzip", compression_opts=4)
+                create_dset(f, dset, Cl[i])
 
         if ngal_glass is not None:
             for i, ngal in enumerate(ngal_glass):
                 dset = f'ngal_glass/{i}'
-                LOGGER.debug(f'storing {dset}')
-                f.create_dataset(name=dset, data=ngal, shuffle=True, compression="gzip", compression_opts=4)
+                create_dset(f, dset, ngal)
 
         if nuisance_parameters is not None:
-
             for k, v in nuisance_parameters.items():
-
                 dset = f'nuissance_parameters/{k}'
                 f.create_dataset(name=dset, data=np.array(v))
-        LOGGER.info('stored nuissance parameters')
+            LOGGER.info('stored nuissance parameters')
 
         if cosmo_bundle is not None:
 
