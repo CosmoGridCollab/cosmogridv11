@@ -250,32 +250,6 @@ def main(indices, args):
 
     
 
-def get_indices(tasks):
-    """
-    Parses the jobids from the tasks string.
-
-    :param tasks: The task string, which will get parsed into the job indices
-    :return: A list of the jobids that should be executed
-    """
-    # parsing a list of indices from the tasks argument
-
-    if '>' in tasks:
-        tasks = tasks.split('>')
-        start = tasks[0].replace(' ', '')
-        stop = tasks[1].replace(' ', '')
-        indices = list(range(int(start), int(stop)))
-    elif ',' in tasks:
-        indices = tasks.split(',')
-        indices = list(map(int, indices))
-    else:
-        try:
-            indices = [int(tasks)]
-        except ValueError:
-            raise ValueError("Tasks argument is not in the correct format!")
-
-    return indices
-
-
 def create_shell_table(cosmo, shell_z):
 
     from cosmogridv11.baryonification.halo_utils import get_shell_cov_dist
@@ -977,7 +951,7 @@ if __name__ == '__main__':
     parser.add_argument('--tasks', type=str, default='[0]')
     args, args_remaining = parser.parse_known_args(sys.argv[1:])
 
-    next(main(indices=get_indices(args.tasks), args=args_remaining))
+    next(main(indices=utils_config.get_indices(args.tasks), args=args_remaining))
 
 
 ## code graveyard

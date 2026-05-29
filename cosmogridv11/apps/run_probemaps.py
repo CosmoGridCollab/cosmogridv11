@@ -687,6 +687,15 @@ def arr_row_str(a):
     return s
 
 
+if __name__ == '__main__':
+
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--tasks', type=str, default='[0]')
+    args, args_remaining = parser.parse_known_args(sys.argv[1:])
+
+    next(main(indices=utils_config.get_indices(args.tasks), args=args_remaining))
+
 # code graveyard
 
         # seed_highz = conf['projection']['highz_synfast_seed'] + sim_params['id_param']*10000 + id_perm

@@ -201,3 +201,13 @@ def get_filename_shells_for_variant(variant):
         raise Exception(f'unknown analysis variant {variant}')
 
     return filename_shells, nside
+
+
+if __name__ == '__main__':
+
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--tasks', type=str, default='[0]')
+    args, args_remaining = parser.parse_known_args(sys.argv[1:])
+
+    next(main(indices=utils_config.get_indices(args.tasks), args=args_remaining))

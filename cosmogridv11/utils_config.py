@@ -39,3 +39,30 @@ def load_cosmogrid_shell_info(fname, parslist):
 
     LOGGER.info(f'loaded shell_info with {len(shell_info)} parameters from {fname}')
     return shell_info
+
+
+def get_indices(tasks):
+    """
+    Parses the jobids from the tasks string.
+
+    :param tasks: The task string, which will get parsed into the job indices
+    :return: A list of the jobids that should be executed
+    """
+    # parsing a list of indices from the tasks argument
+
+    if '>' in tasks:
+        tasks = tasks.split('>')
+        start = tasks[0].replace(' ', '')
+        stop = tasks[1].replace(' ', '')
+        indices = list(range(int(start), int(stop)))
+    elif ',' in tasks:
+        indices = tasks.split(',')
+        indices = list(map(int, indices))
+    else:
+        try:
+            indices = [int(tasks)]
+        except ValueError:
+            raise ValueError("Tasks argument is not in the correct format!")
+
+    return indices
+
