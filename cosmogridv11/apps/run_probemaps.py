@@ -92,11 +92,16 @@ def resources(args):
             res['main_nsimult'] = 400
 
         if os.environ['CLUSTER_NAME'] == 'calculon':
-            res['pass'] = {'cluster': 'calc-cpu', 'partition': 'cpu-daily'}
+            res['pass'] = {'cluster': 'cluster', 'partition': 'h200'}
             res['main_nsimult'] = 100
             res['main_nproc'] = 8
             res['main_memory'] = 1950
 
+        if os.environ['CLUSTER_NAME'] == 'calculon-cpu':
+            res['pass'] = {'cluster': 'calc-cpu', 'partition': 'cpu-daily'}
+            res['main_nsimult'] = 100
+            res['main_nproc'] = 8
+            res['main_memory'] = 1950
     
     return res
 
