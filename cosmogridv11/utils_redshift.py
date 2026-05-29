@@ -47,8 +47,8 @@ def modify_nz(nz, redshift_params, tag, method='fischbacher'):
         elif method == 'desy3':
 
 
-            get_mean_z = lambda  z, nz : np.trapz(nz * z, x=z)
-            get_sigma_z = lambda  z, nz : np.sqrt(np.trapz( nz * (z-get_mean_z(z, nz))**2, x=z ))
+            get_mean_z = lambda  z, nz : np.trapezoid(nz * z, x=z)
+            get_sigma_z = lambda  z, nz : np.sqrt(np.trapezoid( nz * (z-get_mean_z(z, nz))**2, x=z ))
 
             z_ = nz[:,0]
             nz_ = nz[:,1]/np.sum(nz[:,1])
@@ -98,12 +98,12 @@ def shift_stretch_desy3(nz, delta_z, sigma_z):
     z_, nz_ = nz[:,0], nz[:,1]
 
     # nz_ = nz_/np.sum(nz_)
-    nz_ = nz_/np.trapz(nz_, x=z_)
+    nz_ = nz_/np.trapezoid(nz_, x=z_)
     
     # typo in eqn 
     z_shift = z_ + delta_z
     nz_shift = resample(xp=z_, x=z_shift, y=nz_, interp_kind="linear")
-    z_mean = np.trapz(nz_shift * z_, x=z_)
+    z_mean = np.trapezoid(nz_shift * z_, x=z_)
     z_stretch = (z_ - z_mean)*sigma_z + z_mean
     nz_stretch = resample(xp=z_, x=z_stretch, y=nz_shift, interp_kind="linear")
     nz_final = nz_stretch
@@ -129,7 +129,7 @@ def resample(xp, x, y, interp_kind="linear"):
     """
     yp = interp1d(x=x, y=y, kind=interp_kind, fill_value="extrapolate")(xp)
     yp = np.clip(yp, a_min=0, a_max=np.inf)
-    yp = yp / np.trapz(yp, x=xp)
+    yp = yp / np.trapezoid(yp, x=xp)
     return yp
 
 
@@ -191,11 +191,11 @@ def overlap(bin1, bin2):
     z_interp = np.linspace(min(min(z1), min(z2)), max(max(z1), max(z2)), 1000)
     nz1 = np.interp(z_interp, z1, bin1[:, 1])
     nz2 = np.interp(z_interp, z2, bin2[:, 1])
-    norm1 = np.trapz(nz1, z_interp)
-    norm2 = np.trapz(nz2, z_interp)
+    norm1 = np.trapezoid(nz1, z_interp)
+    norm2 = np.trapezoid(nz2, z_interp)
     nz1 /= norm1
     nz2 /= norm2
-    return np.trapz(np.minimum(nz1, nz2), z_interp)
+    return np.trapezoid(np.minimum(nz1, nz2), z_interp)
 
 
 def overlap_all_bins(nz):
@@ -256,7 +256,7 @@ def normalize_bins(nz):
     """
     n_tot = compute_n_tot(nz)
     z = nz[0][:, 0]
-    norm = np.trapz(n_tot, z)
+    norm = np.trapezoid(n_tot, z)
     for NZ in nz:
         NZ[:, 1] /= norm
     return nz

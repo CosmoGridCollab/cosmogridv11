@@ -286,8 +286,8 @@ def profiles(rbin, Mvir, cvir, Mc, mu, thej, cosmo_corr, cosmo_bias, param, rhoc
     rhoDMB_int = splev(tck=tck_DMB, x=r_int, ext=1)
 
     # integrate (factor of 2 because r_int > 0, we integrate from the plane through the center)
-    projected_rho_DMO = 2*np.trapz(rhoDMO_int, rbin, axis=0)
-    projected_rho_DMB = 2*np.trapz(rhoDMB_int, rbin, axis=0)
+    projected_rho_DMO = 2*np.trapezoid(rhoDMO_int, rbin, axis=0)
+    projected_rho_DMB = 2*np.trapezoid(rhoDMB_int, rbin, axis=0)
     integrated_mass_DMO = cumulative_trapezoid(2.0 * np.pi * rbin * projected_rho_DMO, rbin, initial=1e-8)
     integrated_mass_DMB = cumulative_trapezoid(2.0 * np.pi * rbin * projected_rho_DMB, rbin, initial=1e-8)
 
