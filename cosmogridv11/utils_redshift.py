@@ -21,7 +21,7 @@ from scipy.integrate import quad
 
 def modify_nz(nz, redshift_params, tag, method='fischbacher'):
 
-    if np.all(redshift_params==0):
+    if np.all(np.array(redshift_params).ravel()==0):
         
         return nz 
 

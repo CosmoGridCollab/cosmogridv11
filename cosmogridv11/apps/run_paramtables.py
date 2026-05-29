@@ -71,10 +71,6 @@ def setup(args):
 
 def main(indices, args):
 
-    from UFalcon import probe_weights
-
-    # make tf records
-
     args = setup(args)
     conf = utils_config.load_config(args.config)
     utils_io.robust_makedirs(args.dir_out)
