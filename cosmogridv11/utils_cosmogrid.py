@@ -62,6 +62,12 @@ def get_simulations_list(set_type='all'):
     :return simslist_fiducial: simulations list
     :return parslist_fiducial: input parameters list
     """
+    
+    def ensure_endswith(s, x='/'):
+        if not s.endswith(x):
+            s += x
+        return s
+    
 
     # get simulation list
     dir_resources = os.path.join(os.path.dirname(__file__), '..', 'resources')
