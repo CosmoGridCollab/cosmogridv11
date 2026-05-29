@@ -399,6 +399,7 @@ def euclid_map_projector(index, filepath_out, variant, nside_maps, path_simulati
 
 
     # store 
+    import pudb; pudb.set_trace()
     store_products(filepath_out, maps_WL, cat_WL, kappa_tomo, Cls, Cgg, nuisance_parameters, ngal_glass, cosmo_bundle, nside_maps)
 
     return filepath_out

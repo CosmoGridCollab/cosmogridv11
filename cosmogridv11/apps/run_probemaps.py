@@ -68,7 +68,7 @@ def resources(args):
     
     res = {'main_nsimult': 500,
            'main_memory':16000,
-           'main_time_per_index':1, # hours
+           'main_time_per_index':args.num_maps_per_index*15/60, # hours
            'main_scratch':int(2000*args.num_maps_per_index),
            'merge_memory':64000,
            'merge_time':24,
