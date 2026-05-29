@@ -90,6 +90,13 @@ def resources(args):
 
         if os.environ['CLUSTER_NAME'] == 'euler':
             res['main_nsimult'] = 400
+
+        if os.environ['CLUSTER_NAME'] == 'calculon':
+            res['pass'] = {'cluster': 'calc-cpu', 'partition': 'cpu-daily'}
+            res['main_nsimult'] = 100
+            res['main_nproc'] = 8
+            res['main_memory'] = 1950
+
     
     return res
 
@@ -678,9 +685,6 @@ def arr_row_str(a):
     for k in a.dtype.names:
         s += f'{k}={str(a[k]):>4s} '
     return s
-
-
-
 
 
 # code graveyard
