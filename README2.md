@@ -9,9 +9,27 @@ Codes for CosmoGridV1.1 simulations.
 
 ## Installation
 
-For now, please use:
+This package uses the modern Python packaging standard in `pyproject.toml`, so it can be installed with `uv`, `pip`, and other PEP 517/518-compatible installers.
 
-``python setup.py install``
+Using `uv` from a local checkout:
+
+```bash
+uv pip install .
+```
+
+For editable development installs:
+
+```bash
+uv pip install -e .
+```
+
+Using `pip` from a local checkout:
+
+```bash
+python -m pip install .
+```
+
+The legacy `python setup.py install` workflow is no longer used.
 
 
 

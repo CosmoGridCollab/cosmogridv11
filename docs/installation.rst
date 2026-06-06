@@ -40,11 +40,25 @@ Or download the `tarball`_:
 
     $ curl -OJL https://github.com/tomaszkacprzak/cosmogridv11/tarball/master
 
-Once you have a copy of the source, you can install it with:
+Once you have a copy of the source, install it with a modern Python package installer:
 
 .. code-block:: console
 
-    $ python setup.py install
+    $ uv pip install .
+
+For editable development installs, use:
+
+.. code-block:: console
+
+    $ uv pip install -e .
+
+You can also install from the local checkout with ``pip``:
+
+.. code-block:: console
+
+    $ python -m pip install .
+
+The legacy ``python setup.py install`` workflow is no longer used.
 
 
 .. _Github repo: https://github.com/tomaszkacprzak/cosmogridv11

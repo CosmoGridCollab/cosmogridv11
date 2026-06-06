@@ -22,6 +22,30 @@ Codes for CosmoGridV1.1 simulations.
 * Paper: Kacprzak et al. 2023 https://arxiv.org/abs/2209.04662
 
 
+Installation
+------------
+
+CosmoGridV11 uses the modern Python packaging standard in ``pyproject.toml``.
+Install it from a local checkout with ``uv``:
+
+.. code-block:: console
+
+    $ uv pip install .
+
+For editable development installs, use:
+
+.. code-block:: console
+
+    $ uv pip install -e .
+
+You can also install with ``pip``:
+
+.. code-block:: console
+
+    $ python -m pip install .
+
+The legacy ``python setup.py install`` workflow is no longer used.
+
 
 Credits
 -------
