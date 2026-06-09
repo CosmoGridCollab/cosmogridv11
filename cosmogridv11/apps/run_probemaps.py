@@ -22,6 +22,25 @@ z_lim_up = 3 # for lss probes
 base_shift_nz = 0.0
 kw_ufalcon = {'interpolation_kind': 'linear', 'z_lim_low': z_lim_low, 'z_lim_up': z_lim_up, 'shift_nz': base_shift_nz}
 
+def show_help():
+    help_text = """
+    run_probemaps usage instructions
+    ======================================
+    (1) main: make maps
+    (2) missing: find missing maps
+
+    Individual commands:
+
+    (1) main: make maps
+    Input: configuration yaml file, output directory, number of maps per index
+    Output: maps
+
+    (2) missing: find missing maps
+    Input: configuration yaml file, output directory, number of maps per index
+    Output: yaml file with indices of missing maps
+    """
+    print(help_text)
+
 
 def setup(args):
 
@@ -556,7 +575,6 @@ def get_shell_permutations(params, shellinfo, n_sims_use, n_max_replicas, seed, 
 
 def missing(indices, args):
 
-    args = setup(args)
     conf = utils_config.load_config(args.config)
 
     if conf['projection']['shell_perms'] == True:
@@ -607,6 +625,9 @@ def missing(indices, args):
     list_missing = list(np.unique(list_missing))
     LOGGER.info(f'missing {len(list_missing)} indices:')
     LOGGER.info(','.join([str(i) for i in list_missing]))
+
+    fname_missing = f'probemaps_missing_indices.yaml'
+    utils_io.write_yaml(fname_missing, list_missing)
 
     return list_missing
 

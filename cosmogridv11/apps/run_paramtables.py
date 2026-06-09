@@ -69,9 +69,8 @@ def setup(args):
 
     return args
 
-def main(indices, args):
+def main(args):
 
-    args = setup(args)
     conf = utils_config.load_config(args.config)
     utils_io.robust_makedirs(args.dir_out)
 
@@ -92,19 +91,6 @@ def main(indices, args):
         permlist = create_shell_permutations(conf, args) 
         filepath_permlist = get_filepath_permlist(args.dir_out)
         store_permlist(filepath_permlist, permlist)
-
-    yield 0
-
-def resources(args):
-
-    if type(args) is list:
-        args = setup(args)
-        
-    res = {'main_memory': 4000,
-           'main_time_per_index': 1, # hours
-           'main_scratch':4000}
-
-    return res
 
 
 def store_barylist(fpath, metainfo):
@@ -626,12 +612,8 @@ def store_permlist(fname, permlist):
 
 if __name__ == '__main__':
 
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--tasks', type=str, default='[0]')
-    args, args_remaining = parser.parse_known_args(sys.argv[1:])
-
-    next(main(indices=utils_config.get_indices(args.tasks), args=args_remaining))
+    args = setup(sys.argv[1:])
+    main(args)
     
 
 
@@ -716,3 +698,16 @@ if __name__ == '__main__':
 
 #     return redshift_params
 
+
+    
+
+# def resources(args):
+
+#     if type(args) is list:
+#         args = setup(args)
+        
+#     res = {'main_memory': 4000,
+#            'main_time_per_index': 1, # hours
+#            'main_scratch':4000}
+
+#     return res
