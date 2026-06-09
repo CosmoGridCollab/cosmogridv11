@@ -9,48 +9,48 @@
 # halo profiles  
 
 - name:  v11_bary_paramtable # create baryon parameter table in the new format
-  cmd: esub cosmogridv1.apps.run_paramtables baryon_params --config=config_v11.yaml   --dir_out=v11 --verbosity=debug 
+  cmd: python -m cosmogridv1.apps.run_paramtables baryon_params --config=config_v11.yaml   --dir_out=v11 --verbosity=debug 
 
 # benchmarks
 
 - name: v11_bench_haloprof # benchmark halo profiling
-  cmd: esub cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --tasks="3400>3407" --n_cores=7 --mode=jobarray --verbosity=info 
+  cmd: python -m cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --tasks="3400>3407" --n_cores=7 --mode=jobarray --verbosity=info 
 
 - name: v11_bench_baryonify # baryonify - here only the benchmarks in indices 3400-3407
-  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells  --config=config_v11.yaml   --dir_out=v11 --tasks="3400>3407" --n_cores=7 --mode=jobarray --verbosity=info
+  cmd: python -m cosmogridv1.apps.run_haloops baryonify_shells  --config=config_v11.yaml   --dir_out=v11 --indices="3400>3407" --n_cores=7 --mode=jobarray --verbosity=info
 
 # full run fiducial
 
 - name: v11_fid_haloprof # fiducial cosmology + deltas halo profiling
-  cmd: esub cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info 
+  cmd: python -m cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --indices="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info 
 
 - name: v11_fid_baryonify # fiducial cosmology + deltas shell baryonification
-  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info 
+  cmd: python -m cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --indices="0>3400" --n_cores=3400 --mode=jobarray --verbosity=info 
 
 # run the grid
 
 - name: v11_grid_haloprof # grid cosmologies + deltas halo profiling
-  cmd: esub cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --tasks="3400>20900" --n_cores=17000 --mode=jobarray --verbosity=info 
+  cmd: python -m cosmogridv1.apps.run_haloops profile_halos --config=config_v11.yaml --dir_out=v11 --indices="3400>20900" --n_cores=17000 --mode=jobarray --verbosity=info 
 
 - name: v11_grid_baryonify # baryonify profile full grid
-  cmd: esub cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --tasks="3400>20900" --n_cores=17000 --mode=jobarray --verbosity=info
+  cmd: python -m cosmogridv1.apps.run_haloops baryonify_shells --config=config_v11.yaml   --dir_out=v11 --indices="3400>20900" --n_cores=17000 --mode=jobarray --verbosity=info
 
 # redshift perturbations
 
 - name: v11desy3_shell_permtable
-  cmd: esub cosmogridv1.apps.run_paramtables shell_permutations --config=config_v11desy3.yaml   --dir_out=v11desy3 --verbosity=info
+  cmd: python -m cosmogridv1.apps.run_paramtables shell_permutations --config=config_v11desy3.yaml   --dir_out=v11desy3 --verbosity=info
   
 # project shells
 
 - name: proj_bench
-  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml      --dir_out=v11desy3    --num_maps_per_index=10  --tasks="6700>6707" --verbosity=info --largemem --mode=jobarray --n_cores=1
+  cmd: python -m cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml      --dir_out=v11desy3    --num_maps_per_index=10  --indices="6700>6707" --verbosity=info --largemem --mode=jobarray --n_cores=1
   
 - name: proj_fid1
-  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml      --dir_out=v11desy3    --num_maps_per_index=10 --tasks="0>1700"     --verbosity=info --mode=jobarray --n_cores=1700
+  cmd: python -m cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml      --dir_out=v11desy3    --num_maps_per_index=10 --indices="0>1700"     --verbosity=info --mode=jobarray --n_cores=1700
 
 - name: proj_fid1_dmo
-  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3_dmo.yaml  --dir_out=v11desy3    --num_maps_per_index=10 --tasks="0>1700"     --verbosity=info --mode=jobarray --n_cores=1700
+  cmd: python -m cosmogridv1.apps.run_probemaps --config=config_v11desy3_dmo.yaml  --dir_out=v11desy3    --num_maps_per_index=10 --indices="0>1700"     --verbosity=info --mode=jobarray --n_cores=1700
 
 - name: proj_grid
-  cmd: esub cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml      --dir_out=v11desy3    --num_maps_per_index=10 --tasks="1700>6700""  --verbosity=info --mode=jobarray --n_cores=5000
+  cmd: python -m cosmogridv1.apps.run_probemaps --config=config_v11desy3.yaml      --dir_out=v11desy3    --num_maps_per_index=10 --indices="1700>6700""  --verbosity=info --mode=jobarray --n_cores=5000
 
