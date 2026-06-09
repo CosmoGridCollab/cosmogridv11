@@ -33,6 +33,8 @@ def setup(args):
                         help='if to write patch maps - use only for testing')
     parser.add_argument('--par_ids', type=str, required=True,
                         help='ids of parameters to run on')
+    parser.add_argument('--indices', type=str, default='0',
+                        help='indices to run, format: 0,1,2,4 or start>stop. Default is 0.')
 
     args = parser.parse_args(args)
 
@@ -46,16 +48,6 @@ def setup(args):
     return args
 
 
-def resources(args):
-    
-    res = {'main_memory':8000,
-           'main_time_per_index':4, # hours
-           'main_scratch':6500,
-           'merge_memory':64000,
-           'merge_time':24}
-           # 'pass':{'constraint': 'knl', 'account': 'des', 'qos': 'regular'}} # Cori
-    
-    return res
 
 
 def arr_row_str(a):
@@ -83,6 +75,7 @@ def get_patches_indices(n_patches, nside_out):
 
 def main(indices, args):
     """
+    Calculate features from projected maps.
     """
 
     args = setup(args)
@@ -207,8 +200,6 @@ def main(indices, args):
         filepath_out = get_filepath_features(dir_sim)
         store_features(filepath_out, dict_out)
             
-        yield index
-
 
 def merge(indices, args):
 
@@ -390,9 +381,21 @@ def add_probe_noise(m, probe, conf):
 
 if __name__ == '__main__':
 
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--tasks', type=str, default='[0]')
-    args, args_remaining = parser.parse_known_args(sys.argv[1:])
+    args = setup(sys.argv[1:])
+    indices = utils_config.get_indices(args.indices)
+    main(indices=indices, args=args)
 
-    next(main(indices=utils_config.get_indices(args.tasks), args=args_remaining))
+
+# Code graveyard:
+
+
+def resources(args):
+    
+    res = {'main_memory':8000,
+           'main_time_per_index':4, # hours
+           'main_scratch':6500,
+           'merge_memory':64000,
+           'merge_time':24}
+           # 'pass':{'constraint': 'knl', 'account': 'des', 'qos': 'regular'}} # Cori
+    
+    return res

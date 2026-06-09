@@ -56,7 +56,7 @@ def setup(args):
     description = 'Various halo related operations'
     parser = argparse.ArgumentParser(description=description, add_help=True)
     # parser.add_argument('command', type=str, default='help', choices=('help', 'profile_halos', 'baryonify_shells', 'paint_haloshells'), 
-    parser.add_argument('command', type=str, default='help', choices=('help', 'profile_halos', 'baryonify_shells'), 
+    parser.add_argument('command', type=str, default='help', choices=('help', 'profile_halos', 'baryonify_shells', "missing"), 
                         help='command to run, "help" for instructions')
     parser.add_argument('-v', '--verbosity', type=str, default='info', choices=('critical', 'error', 'warning', 'info', 'debug'), 
                         help='logging level')
@@ -70,7 +70,8 @@ def setup(args):
                         help='output dir for the results')
     parser.add_argument('--dir_out_archive', type=str, default=None, 
                         help='output dir for archiving the results, if specified the data will be copied there and removed from dir_out')
-
+    parser.add_argument('--indices', type=str, default='0',
+                        help='indices to run, format: 0,1,2,4 or start>stop. Default is 0.')
     args, _  = parser.parse_known_args(args)
 
     utils_logging.set_all_loggers_level(args.verbosity)
@@ -81,44 +82,6 @@ def setup(args):
         utils_io.robust_makedirs(args.dir_out)
 
     return args
-
-
-def resources(args):
-
-    if type(args) is list:
-        args = setup(args)
-
-    if args.command == 'profile_halos':
-        
-        main_memory = 64000 if args.long else 4000
-        main_time_per_index = 4 if args.long else 24 
-    
-    elif args.command == 'baryonify_shells':
-
-        main_memory = 64000 if args.long else 8000
-        main_time_per_index = 4 if args.long else 24
-
-            
-    res = {'main_memory': main_memory,
-           'main_time_per_index': main_time_per_index, # hours
-           'main_scratch':20000,
-           'merge_memory':64000,
-           'main_nsimult':200,
-           'merge_time':24}
-
-    if 'CLUSTER_NAME' in os.environ:
-
-            if os.environ['CLUSTER_NAME'].lower() == 'perlmutter':
-                res['pass'] = {'constraint': 'cpu', 'account': 'des', 'qos': 'shared'}
-
-            elif os.environ['CLUSTER_NAME'].lower() == 'euler':
-
-                if args.command == 'baryonify_shells':
-                    
-                    res['main_nsimult'] = 400
-                
-    
-    return res
 
 def print_baryon_params(params_bary):
 
@@ -167,6 +130,11 @@ def main(indices, args):
     if args.command == 'help':
 
         show_help()
+        sys.exit(0)
+
+    if args.command == 'missing':
+        
+        missing(indices, args)
         sys.exit(0)
 
     for index in indices:
@@ -246,7 +214,6 @@ def main(indices, args):
                                          dir_out=args.dir_out,
                                          dir_out_archive=args.dir_out_archive)
 
-        yield index
 
     
 
@@ -946,12 +913,9 @@ def create_baryonification_info_file(fname_out, shell_infos, param):
 
 if __name__ == '__main__':
 
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--tasks', type=str, default='[0]')
-    args, args_remaining = parser.parse_known_args(sys.argv[1:])
-
-    next(main(indices=utils_config.get_indices(args.tasks), args=args_remaining))
+    args = setup(sys.argv[1:])
+    indices = utils_config.get_indices(args.indices)
+    main(indices=indices, args=args)
 
 
 ## code graveyard
@@ -1296,3 +1260,43 @@ if __name__ == '__main__':
     # LOGGER.info('diff_shell_inds={:4.2f} GB'.format(diff_shell_inds.nbytes/1e9) )
     # LOGGER.info('diff_shell_vals={:4.2f} GB'.format(diff_shell_vals.nbytes/1e9) )
     # LOGGER.info('shell_infos_arr={:4.2f} GB'.format(shell_infos_arr.nbytes/1e9) )
+
+
+
+
+# def resources(args):
+
+#     if type(args) is list:
+#         args = setup(args)
+
+#     if args.command == 'profile_halos':
+        
+#         main_memory = 64000 if args.long else 4000
+#         main_time_per_index = 4 if args.long else 24 
+    
+#     elif args.command == 'baryonify_shells':
+
+#         main_memory = 64000 if args.long else 8000
+#         main_time_per_index = 4 if args.long else 24
+
+            
+#     res = {'main_memory': main_memory,
+#            'main_time_per_index': main_time_per_index, # hours
+#            'main_scratch':20000,
+#            'merge_memory':64000,
+#            'main_nsimult':200,
+#            'merge_time':24}
+
+#     if 'CLUSTER_NAME' in os.environ:
+
+#             if os.environ['CLUSTER_NAME'].lower() == 'perlmutter':
+#                 res['pass'] = {'constraint': 'cpu', 'account': 'des', 'qos': 'shared'}
+
+#             elif os.environ['CLUSTER_NAME'].lower() == 'euler':
+
+#                 if args.command == 'baryonify_shells':
+                    
+#                     res['main_nsimult'] = 400
+                
+    
+#     return res

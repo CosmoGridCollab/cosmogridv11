@@ -68,7 +68,7 @@ Ready to contribute? Here's how to set up `cosmogridv11` for local development.
 
     $ mkvirtualenv cosmogridv11
     $ cd cosmogridv11/
-    $ python setup.py develop
+    $ python -m pip install -e .
 
 4. Create a branch for local development::
 
@@ -80,7 +80,7 @@ Ready to contribute? Here's how to set up `cosmogridv11` for local development.
    tests, including testing other Python versions with tox::
 
     $ flake8 cosmogridv11 tests
-    $ python setup.py test or pytest
+    $ pytest
     $ tox
 
    To get flake8 and tox, just pip install them into your virtualenv.
