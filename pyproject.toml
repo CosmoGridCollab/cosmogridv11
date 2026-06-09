@@ -32,7 +32,7 @@ dependencies = [
   "numba",
   "camb",
   "chaospy",
-  "pyccl",
+  "pyccl @ git+https://github.com/tomaszkacprzak/CCL.git@master",
 ]
 
 [project.urls]

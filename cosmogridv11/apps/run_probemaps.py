@@ -27,6 +27,8 @@ def setup(args):
 
     description = 'Make maps'
     parser = argparse.ArgumentParser(description=description, add_help=True)
+    parser.add_argument("command", type=str, default="main", choices=("main", "missing"),
+                        help="Command to run")
     parser.add_argument('-v', '--verbosity', type=str, default='info', choices=('critical', 'error', 'warning', 'info', 'debug'), 
                         help='logging level')
     parser.add_argument('--config', type=str, required=True, 
@@ -47,6 +49,8 @@ def setup(args):
                         help='Use more time')
     parser.add_argument('--precopy', action='store_true',
                         help='Copy all sims before proceeding')
+    parser.add_argument('--indices', type=str, default='0>1000', 
+                        help='Indices to process, format: 0,1,2,4 or start>stop')
 
     args = parser.parse_args(args)
 
@@ -57,53 +61,10 @@ def setup(args):
     if args.dir_out is not None:
         args.dir_out = utils_io.get_abs_path(args.dir_out)
 
-
     return args
 
 
-def resources(args):
 
-    if type(args) is list:
-        args = setup(args)
-    
-    res = {'main_nsimult': 500,
-           'main_memory':16000,
-           'main_time_per_index':args.num_maps_per_index*30/60, # hours
-           'main_scratch':int(2000*args.num_maps_per_index),
-           'merge_memory':64000,
-           'merge_time':24,
-           'pass': {'constraint': 'cpu', 'account': 'des', 'qos': 'shared'}
-           } # perlmutter
-
-    if args.largemem:
-        res['main_memory'] = 32000
-        res['main_scratch'] = 32000
-
-    if args.long:
-        res['main_time_per_index'] = 24
-
-    if 'CLUSTER_NAME' in os.environ:
-        
-        if os.environ['CLUSTER_NAME'] == 'perlmutter':
-            res['pass'] = {'constraint': 'cpu', 'qos': 'shared'}
-            res['main_nsimult'] = 200
-
-        if os.environ['CLUSTER_NAME'] == 'euler':
-            res['main_nsimult'] = 400
-
-        if os.environ['CLUSTER_NAME'] == 'calculon':
-            res['pass'] = {'cluster': 'cluster', 'partition': 'h200'}
-            res['main_nsimult'] = 100
-            res['main_nproc'] = 8
-            res['main_memory'] = 1950
-
-        if os.environ['CLUSTER_NAME'] == 'calculon-cpu':
-            res['pass'] = {'cluster': 'calc-cpu', 'partition': 'cpu-daily'}
-            res['main_nsimult'] = 100
-            res['main_nproc'] = 8
-            res['main_memory'] = 1950
-    
-    return res
 
 
 def main(indices, args):
@@ -113,7 +74,6 @@ def main(indices, args):
     https://cosmo-gitlab.phys.ethz.ch/jafluri/arne_handover/-/blob/main/map_projection/patch_generation/project_patches.py#L1
     """
 
-    args = setup(args)
     conf = utils_config.load_config(args.config)
 
     do_perms = conf['projection']['shell_perms']
@@ -188,7 +148,7 @@ def main(indices, args):
         utils_maps.cleanup_cosmogrid_files()
         LOGGER.info(f'done with index {index} time={(time.time()-time_start)/60.:2.2f} min')
 
-        yield index
+    return index
 
 
 
@@ -694,12 +654,15 @@ def arr_row_str(a):
 
 if __name__ == '__main__':
 
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--tasks', type=str, default='[0]')
-    args, args_remaining = parser.parse_known_args(sys.argv[1:])
+    args = setup(sys.argv[1:])
+    indices = utils_config.get_indices(args.indices)
 
-    next(main(indices=utils_config.get_indices(args.tasks), args=args_remaining))
+    if args.command == "main":
+        main(indices=indices, args=args)
+    elif args.command == "missing":
+        missing(indices=indices, args=args)
+    else:
+        raise ValueError(f"Unknown command: {args.command}")
 
 # code graveyard
 
@@ -919,4 +882,46 @@ if __name__ == '__main__':
     # n_sims_avail = np.count_nonzero(simslist_all['path_par']==path_params)
     # n_sims_use = min(float(n_max_sims_use), n_sims_avail)
     
+# def resources(args):
+
+#     if type(args) is list:
+#         args = setup(args)
     
+#     res = {'main_nsimult': 500,
+#            'main_memory':16000,
+#            'main_time_per_index':args.num_maps_per_index*30/60, # hours
+#            'main_scratch':int(2000*args.num_maps_per_index),
+#            'merge_memory':64000,
+#            'merge_time':24,
+#            'pass': {'constraint': 'cpu', 'account': 'des', 'qos': 'shared'}
+#            } # perlmutter
+
+#     if args.largemem:
+#         res['main_memory'] = 32000
+#         res['main_scratch'] = 32000
+
+#     if args.long:
+#         res['main_time_per_index'] = 24
+
+#     if 'CLUSTER_NAME' in os.environ:
+        
+#         if os.environ['CLUSTER_NAME'] == 'perlmutter':
+#             res['pass'] = {'constraint': 'cpu', 'qos': 'shared'}
+#             res['main_nsimult'] = 200
+
+#         if os.environ['CLUSTER_NAME'] == 'euler':
+#             res['main_nsimult'] = 400
+
+#         if os.environ['CLUSTER_NAME'] == 'calculon':
+#             res['pass'] = {'cluster': 'cluster', 'partition': 'h200'}
+#             res['main_nsimult'] = 100
+#             res['main_nproc'] = 8
+#             res['main_memory'] = 1950
+
+#         if os.environ['CLUSTER_NAME'] == 'calculon-cpu':
+#             res['pass'] = {'cluster': 'calc-cpu', 'partition': 'cpu-daily'}
+#             res['main_nsimult'] = 100
+#             res['main_nproc'] = 8
+#             res['main_memory'] = 1950
+    
+#     return res
