@@ -3,12 +3,14 @@ from . import utils_logging, utils_io
 
 LOGGER = utils_logging.get_logger(__file__)
 
+
 def load_mask(filepath):
 
     with h5py.File(filepath, 'r') as f:
         pix_inds = np.array(f['pix_inds_ring'])
 
     return pix_inds
+
 
 def load_nz(filepath, z_max=None):
 
@@ -26,6 +28,48 @@ def load_nz(filepath, z_max=None):
         nz_info = np.clip(nz_info, a_min=0, a_max=None)
 
     return nz_info
+
+def load_nz_desy6(filepath, bin_id, z_max, realization_id=0):
+
+    # Sanity checks on the redshift grid and the n(z) normalization
+    with h5py.File(filepath, "r") as f:
+        z_lo = f["Z_LOW"][:]
+        z_mid = f["Z_MID"][:]
+        z_hi = f["Z_HIGH"][:]
+        nz = f[bin_id][realization_id]
+
+        LOGGER.info(f"desy6 redshift grid: {z_lo[0]:.2f} < z < {z_hi[-1]:.2f}, {z_mid.size} bins, dz = {np.diff(z_lo)[0]:.3f}, realization_id={realization_id}, mean_z={np.sum(nz * z_mid)/np.sum(nz):8.6f}")
+
+        if z_max is not None:
+            select = z_mid <= z_max
+            LOGGER.debug(f'... selected z<{z_max} {np.count_nonzero(select)}/{len(select)}')
+            nz = nz[select]
+            z_mid = z_mid[select]
+
+    nz_info = np.column_stack((z_mid, nz))
+
+    return nz_info
+
+
+def load_shearm_desy6(file_nz, realization_id):
+
+    filename, bin_id = file_nz.split('::')
+    with h5py.File(filename, "r") as f:
+
+        bin_key = bin_id.replace('NZ_', 'M_')
+        if bin_key in f:
+            shearm = f[bin_key][realization_id]
+            LOGGER.info(f"desy6 shearm {bin_key} {realization_id} {shearm:2.4e}")
+        else:
+            shearm = 0
+            LOGGER.info(f"desy6 shearm {bin_key} not found, setting to 0")
+        
+
+
+    return shearm
+
+
+
 
 def cleanup_cosmogrid_files():
 

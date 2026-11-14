@@ -5,7 +5,7 @@
 # Author: Silvan Fischbacher & Tomasz Kacprzak
 # From: https://cosmo-gitlab.phys.ethz.ch/cosmo_public/redshift_tools/-/blob/master/src/redshift_tools/manipulate.py
 
-from cosmogridv11 import utils_logging
+from cosmogridv11 import utils_logging, utils_maps
 from UFalcon import probe_weights
 
 import warnings
@@ -19,7 +19,24 @@ from scipy.optimize import bisect
 from scipy.interpolate import interp1d
 from scipy.integrate import quad
 
-def modify_nz(nz, redshift_params, tag, method='fischbacher'):
+
+def modify_nz(file_nz, z_max, redshift_params, tag, method='fischbacher'):
+
+    if method in ['fishbacher', 'desy3']:
+        # nz shape (n_bins, 2), first column is z, second column is n(z)
+        nz = utils_maps.load_nz(file_nz, z_max=z_max) 
+
+    elif method == 'desy6':
+
+        filename, bin_id = file_nz.split('::')
+        nz = utils_maps.load_nz_desy6(filename, bin_id, z_max=z_max, realization_id=redshift_params)
+    
+
+    else:
+
+        raise Exception(f'unknown redshift error method {method}')
+
+    
 
     if np.all(np.array(redshift_params).ravel()==0):
         
@@ -69,6 +86,14 @@ def modify_nz(nz, redshift_params, tag, method='fischbacher'):
             LOGGER.info(f'bin={tag} delta={delta: 2.4e} sigma={sigma: 2.4e}')
             LOGGER.info(f'mean_z  = {mean_z_orig: 2.4e} -> {mean_z_mod: 2.4e}')
             LOGGER.info(f'sigma_z = {sigma_z_orig: 2.4e} -> {sigma_z_mod: 2.4e}')
+
+        elif method == 'desy6':
+
+            # here we already selected the sample by sampid, so we don't need to do anything
+            LOGGER.info(f'bin={tag} sampid={redshift_params}')
+            nz_mod = nz
+
+            
 
     
     return nz_mod

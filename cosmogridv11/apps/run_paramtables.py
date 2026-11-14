@@ -44,6 +44,19 @@ def show_help():
     print(help_text)
 
 
+
+def resources(args):
+
+    if type(args) is list:
+        args = setup(args)
+        
+    res = {'main_memory': 4000,
+           'main_time_per_index': 1, # hours
+           'main_scratch':4000}
+
+    return res
+
+
 def setup(args):
 
     description = 'Create various parameter tables'
@@ -302,12 +315,12 @@ def create_baryonification_parameters(conf, args):
     LOGGER.info(f'fiducial: new pars table {len(parslist_fiducial)}' )
     LOGGER.info(f'fiducial: new sims table {len(simslist_fiducial)}' )
 
-
     ###################################
     #
     # benchmarks
     #
     ###################################
+
 
     # load benchmark
     simslist_benchmark, parslist_benchmark, _ = utils_cosmogrid.get_simulations_list(set_type='benchmark')
@@ -382,7 +395,7 @@ def create_baryonification_parameters(conf, args):
         plot_stats(simslist_benchmark, par, tag=f'{par} simslist_benchmark')
         plot_stats(parslist_all, par, tag=f'{par} parslist_all')
         plot_stats(simslist_all, par, tag=f'{par} simslist_all')
-
+        
 
     # create new shell_info_all
 
@@ -431,21 +444,37 @@ def create_shell_permutations(conf, args):
     # halton sequence id
 
 
-    new_dtype = [('dirname_perm', 'a512'),
+    new_dtype = [('dirname_perm', 'S512'),
                  ('id_redshift_perturb', 'i4'),
                  ('id_perm', 'i4')]
-    
-    for i, p in enumerate(nz_info):
 
-        if p['name'] != 'cmb':
-    
-            new_dtype += [(p['name'] + '__delta_meanz', 'f4'),
-                          (p['name'] + '__delta_sigmaz', 'f4')]
+    if conf['redshift_error_method'] in ['desy3', 'fishbacher']:
+        
+        for i, p in enumerate(nz_info):
+
+            if p['name'] != 'cmb':
+        
+                new_dtype += [(p['name'] + '__delta_meanz', 'f4'),
+                            (p['name'] + '__delta_sigmaz', 'f4')]
+
+    elif conf['redshift_error_method'] == 'desy6':
+
+        for i, p in enumerate(nz_info):
+
+            if p['name'] == 'cmb':
+                continue
+
+            if 'metacal' in p['name']:
+
+                new_dtype += [(p['name'] + '__sampid', 'f4'), (p['name'] + '__shearbiasm', 'f4')]
+
+            if 'maglim' in p['name']:
+
+                new_dtype += [(p['name'] + '__sampid', 'f4')]
 
     dtype = np.dtype(parslist_all.dtype.descr + new_dtype)
 
     sim_types = ['fiducial', 'grid', 'benchmarks']
-
 
 
     # default number of permutations per sim
@@ -475,7 +504,7 @@ def create_shell_permutations(conf, args):
         h = 0
         n = 0
 
-        if not par_fixed[sim_type]:
+        if (not par_fixed[sim_type]) and (conf['redshift_error_method'] in ['desy3', 'fishbacher']):
             samples_z_perturb = get_joint_param_grid(nz_info, len_seq=n_total, sequence='latin_hypercube')
 
         # loop over cosmology parameters
@@ -486,12 +515,41 @@ def create_shell_permutations(conf, args):
             # loop over permutations
             for j in range(n_perm):
 
-                if par_fixed[sim_type]:
 
-                    permlist = add_central_redshift_perturb_value(nz_info, permlist, n)
-                
-                else:
-                    permlist = add_scatter_perturb_value(samples_z_perturb, permlist, h, n)
+                # The n(z) perturbation is parameterized as a mean shift and shape stretch
+                if conf['redshift_error_method'] in ['desy3', 'fishbacher']:
+
+                    if par_fixed[sim_type]:
+
+                        permlist = add_central_redshift_perturb_value(nz_info, permlist, n)
+                    
+                    else:
+                        permlist = add_scatter_perturb_value(samples_z_perturb, permlist, h, n)
+
+
+                # DESY6 has a different way of capturing redshift uncertainty: there are multiple n(z) samples for each redshift bin
+                elif conf['redshift_error_method'] == 'desy6':
+
+                    if par_fixed[sim_type]:
+
+                        for p in nz_info:
+
+                            if p['name'] == 'cmb':
+                                continue
+
+                            elif 'maglim' in p['name']:
+
+                                permlist[n][p['name'] + '__sampid'] = h
+
+                            elif 'metacal' in p['name']:
+
+                                permlist[n][p['name'] + '__sampid'] = h # this will be the index of the redshiftnz+shearbiasm in the 
+                                permlist[n][p['name'] + '__shearbiasm'] = h
+
+                            else: 
+
+                                raise Exception('desy6 samples have to contain metacal or maglim in the sample name')
+                            
 
                 # fill parameters
                 for c in parslist.dtype.names:

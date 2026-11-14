@@ -194,8 +194,8 @@ def write_yaml(filename, d):
         
     import yaml
 
-    with open(filename, 'w') as f:
-        stream = yaml.dump(d, default_flow_style=False, width=float("inf"))
+    with open(filename, 'w', encoding="utf-8") as f:
+        stream = yaml.dump(d, default_flow_style=False, width=float("inf"), allow_unicode=True)
         f.write(stream.replace('\n- ', '\n\n- '))
 
     LOGGER.debug('wrote yaml {}'.format(filename))

@@ -597,6 +597,12 @@ def store_probe_kernels(filename_out, nz_info, w_shell, mode='w'):
                     f[d].attrs['nz_norm'] = nzi['nz_norm']
                 if 'c_dg2' in nzi.keys():
                     f[d].attrs['c_dg2'] = nzi['c_dg2']
+                if 'shearm' in nzi.keys():
+                    f[d].attrs['shearm'] = nzi['shearm']
+                    LOGGER.debug(f'stored shearm {nzi["name"]} {nzi["shearm"]:2.4e}')
+                else:
+                    LOGGER.info(f"desy6 shearm {nzi["name"]} not found: {nzi.keys()}")
+
 
             for probe in all_probes:
 

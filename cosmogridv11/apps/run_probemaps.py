@@ -84,6 +84,43 @@ def setup(args):
 
 
 
+def resources(args):
+
+    if type(args) is list:
+        args = setup(args)
+    
+    res = {'main_nsimult': 500,
+           'main_memory':16000,
+           'main_time_per_index':1, # hours
+           'main_scratch':int(2000*args.num_maps_per_index),
+           'merge_memory':64000,
+           'merge_time':24,
+           'pass': {'constraint': 'cpu', 'account': 'des', 'qos': 'shared'}
+           } # perlmutter
+
+    if args.largemem:
+        res['main_memory'] = 32000
+        res['main_scratch'] = 32000
+
+    if args.long:
+        res['main_time_per_index'] = 24
+
+    if 'CLUSTER_NAME' in os.environ:
+        
+        if os.environ['CLUSTER_NAME'] == 'perlmutter':
+            
+            res['pass'] = {'constraint': 'cpu', 'qos': 'shared'}
+            res['main_nsimult'] = 200
+
+        if os.environ['CLUSTER_NAME'] == 'euler':
+            res['main_nsimult'] = 400
+
+        if os.environ['CLUSTER_NAME'] == 'calculon':
+
+            res['pass'] = {'cluster': 'calc-cpu', 'partition': 'cpu-daily'}
+            res['main_nsimult'] = 200
+    
+    return res
 
 
 def main(indices, args):
@@ -93,6 +130,10 @@ def main(indices, args):
     https://cosmo-gitlab.phys.ethz.ch/jafluri/arne_handover/-/blob/main/map_projection/patch_generation/project_patches.py#L1
     """
 
+    try:
+        args = setup(args)
+    except Exception as err:
+        LOGGER.error(f'args setup failed, already parsed? {err}')
     conf = utils_config.load_config(args.config)
 
     do_perms = conf['projection']['shell_perms']
@@ -294,6 +335,7 @@ def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_
             try:
                 shells_group = select_shell_group(shells, select_group)
             except Exception as err:
+                LOGGER.error(f'failed to select shell group, err={err}')
                 import pudb; pudb.set_trace();
                 pass
 
@@ -324,7 +366,8 @@ def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_
         probe_maps = utils_projection.add_highest_redshift_shell(probe_maps, probe_kernels, sim_params, parslist_all, seed=seed_highz)
 
         # cell check
-        probe_cells = check_cls_for_probes(probe_maps, probe_kernels, sim_params)    
+        # probe_cells = check_cls_for_probes(probe_maps, probe_kernels, sim_params)    
+        probe_cells = None
 
         # output files and store
         filepath_out = get_filepath_projected_maps(dirpath_out, variant)
@@ -391,7 +434,8 @@ def project_single_sim(index, args, conf):
         probe_maps = utils_projection.add_highest_redshift_shell(probe_maps, nz_info, sim_params=sim_current, parslist_all=parslist_all, seed=index+1231)
         del(shells)
 
-        probe_cells = check_cls_for_probes(probe_maps, nz_info, sim_current)
+        # probe_cells = check_cls_for_probes(probe_maps, nz_info, sim_current)
+        probe_cells = None
 
         # output files and store
         filepath_out = get_filepath_projected_maps(dirpath_out, variant)
@@ -526,19 +570,36 @@ def get_probe_kernels(nz_info, params, shellinfo, nside_out, perm=None, redshift
         if 'file' in sample:
         
             if perm is None:
-
+                
+                raise Exception('need to implement backward compatibility')
                 sample['nz'] = utils_maps.load_nz(sample['file'], z_max=sample['z_max'])
                 LOGGER.warning('----> running shell projection without permutation, ignoring redshfit perturbations')
 
             else:
 
-                redshift_mod = [perm[sample['name']+'__delta_meanz'], perm[sample['name']+'__delta_sigmaz']]
-                LOGGER.info(f'redshift delta mean {redshift_mod[0]: 2.4e} delta sigma {redshift_mod[1]: 2.4e}')
+                if redshift_error_method in ['fishbacher', 'desy3']:
 
-                sample['nz'] = utils_redshift.modify_nz(nz=utils_maps.load_nz(sample['file'], z_max=sample['z_max']), 
-                                                            redshift_params=redshift_mod, 
-                                                            tag=sample['name'], 
-                                                            method=redshift_error_method)
+                    redshift_mod = [perm[sample['name']+'__delta_meanz'], perm[sample['name']+'__delta_sigmaz']]
+                    LOGGER.info(f'redshift delta mean {redshift_mod[0]: 2.4e} delta sigma {redshift_mod[1]: 2.4e}')
+
+                elif redshift_error_method in ['desy6']:
+
+                    redshift_mod = int(perm[sample['name']+'__sampid'])
+                    LOGGER.info(f'redshift sample id {redshift_mod}')
+
+                    shearm = utils_maps.load_shearm_desy6(sample['file'], redshift_mod)
+                    LOGGER.info(f'shearm {shearm}')
+                    sample['shearm'] = shearm
+
+                else:
+
+                    raise Exception(f'unknown redshift error method {redshift_error_method}')
+
+                sample['nz'] = utils_redshift.modify_nz(file_nz=sample['file'], 
+                                                        z_max=sample['z_max'],
+                                                        redshift_params=redshift_mod, 
+                                                        tag=sample['name'], 
+                                                        method=redshift_error_method)
 
         # get weights for probes
         for probe in sample['probes']:
@@ -582,6 +643,8 @@ def missing(indices, args):
         simslist_all, parslist_all, shell_info_all = utils_cosmogrid.get_baryonified_simulations_list(conf, set_type='all')
 
     list_missing = []
+    num_total_files = len(indices)*args.num_maps_per_index
+    num_missing_files = 0
 
     # loop over sims 
 
@@ -613,20 +676,22 @@ def missing(indices, args):
                     if not os.path.isfile(filepath_out):
 
                         LOGGER.debug(f'{perm_id: 6d} /{len(indices)*args.num_maps_per_index} file missing: {filepath_out}')
-                        list_missing.append(index)
-                        pbar.set_description_str(f"checking for missing results, found {len(list_missing)} missing")
+                        list_missing.append(int(index))
+                        pbar.set_description_str(f"checking for missing results, found {len(np.unique(list_missing))} missing")
+                        num_missing_files +=1 
 
                     else:
 
                         LOGGER.debug(f'{perm_id: 6d} /{len(indices)*args.num_maps_per_index} file OK:      {filepath_out}')
 
-
+    LOGGER.info(f'found {num_missing_files} missing files out of {num_total_files} total files ({num_missing_files/num_total_files*100:.2f}%)')
 
     list_missing = list(np.unique(list_missing))
     LOGGER.info(f'missing {len(list_missing)} indices:')
     LOGGER.info(','.join([str(i) for i in list_missing]))
 
     fname_missing = f'probemaps_missing_indices.yaml'
+    list_missing = [int(i) for i in list_missing]
     utils_io.write_yaml(fname_missing, list_missing)
 
     return list_missing
@@ -678,12 +743,15 @@ if __name__ == '__main__':
     args = setup(sys.argv[1:])
     indices = utils_config.get_indices(args.indices)
 
+    LOGGER.info(f'command {args.command} indices {indices}')
+
     if args.command == "main":
         main(indices=indices, args=args)
     elif args.command == "missing":
         missing(indices=indices, args=args)
     else:
         raise ValueError(f"Unknown command: {args.command}")
+
 
 # code graveyard
 
