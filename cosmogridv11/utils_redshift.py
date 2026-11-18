@@ -31,7 +31,6 @@ def modify_nz(file_nz, z_max, redshift_params, tag, method='fischbacher'):
         filename, bin_id = file_nz.split('::')
         nz = utils_maps.load_nz_desy6(filename, bin_id, z_max=z_max, realization_id=redshift_params)
     
-
     else:
 
         raise Exception(f'unknown redshift error method {method}')

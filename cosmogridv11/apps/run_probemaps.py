@@ -9,7 +9,6 @@ import os, warnings, argparse, h5py, numpy as np, time, shutil
 from cosmogridv11 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_shells, utils_maps, utils_projection
 from cosmogridv11.filenames import *
 import healpy as hp
-from cosmogridv11.copy_guardian import NoFileException
 from pathlib import Path
 
 warnings.filterwarnings('ignore', category=DeprecationWarning)
@@ -325,25 +324,38 @@ def project_single_permuted_sim(
             LOGGER.info(f"======> loading sim {i+1}/{len(perms_info)}, id_sim={perms_info['id_sim'][i]} path={path_shells_local[i]}")
             path_sim = utils_cosmogrid.get_sims_path(sim_params, id_sim=perms_info['id_sim'][i])
 
-            try:
-                shells =  utils_maps.load_v11_shells(path_shells_local[i], variant, nside=int(conf['projection']['nside_store']))
+            # try:
+            #     shells =  utils_maps.load_v11_shells(path_shells_local[i], variant, nside=int(conf['projection']['nside_store']))
 
-            except NoFileException as err:
+            # except NoFileException as err:
+            #     LOGGER.error(f'failed to load shells, err={err}')
+            #     LOGGER.error(f'---> errors for variant={variant}, skipping...')
+            #     success = False
+            #     break
+
+            # # select the relevant shell group according to perm indices
+            # select_group = shell_groups[i]['shell_id']
+            # LOGGER.info('select_group='+str(select_group))
+
+            # try:
+            #     shells_group = select_shell_group(shells, select_group)
+            # except Exception as err:
+            #     LOGGER.error(f'failed to select shell group, err={err}')
+            #     import pudb; pudb.set_trace();
+            #     pass
+
+            try:
+            
+                shells_group =  utils_maps.load_v11_shells(path_shells_local[i], variant, 
+                                                        nside=int(conf['projection']['nside_store']),
+                                                        shell_ids=shell_groups[i]['shell_id'])
+            
+            except Exception as err:
                 LOGGER.error(f'failed to load shells, err={err}')
                 LOGGER.error(f'---> errors for variant={variant}, skipping...')
                 success = False
                 break
 
-            # select the relevant shell group according to perm indices
-            select_group = shell_groups[i]['shell_id']
-            LOGGER.info('select_group='+str(select_group))
-
-            try:
-                shells_group = select_shell_group(shells, select_group)
-            except Exception as err:
-                LOGGER.error(f'failed to select shell group, err={err}')
-                import pudb; pudb.set_trace();
-                pass
 
             # random flips and rotations on the shell group
             for k,s in shells_group.items():
@@ -353,7 +365,6 @@ def project_single_permuted_sim(
             for k,s in shells_group.items():
                 shells_perm.setdefault(k, [])
                 shells_perm[k].append( shells_group[k] )
-            del(shells)
 
         if not success:
             LOGGER.warning(f'unsuccessful shell group creation for variant {variant}, skipping..')
@@ -364,6 +375,8 @@ def project_single_permuted_sim(
         for k,s in shells_perm.items():
             shells[k] = np.concatenate(s, axis=0)
             LOGGER.info(f'stacked shell {k} groups size={shells[k].shape}')
+        shells_perm.clear()
+            
 
         # main magic: project probes
         probe_maps = utils_projection.project_all_probes(shells, probe_kernels, shell_weights)

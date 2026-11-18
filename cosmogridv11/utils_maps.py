@@ -297,7 +297,7 @@ def load_shells_uncompressed(path_sim):
         LOGGER.info(f'loaded {os.path.basename(f)} nside={hp.npix2nside(len(m))}')
     return np.array(list_maps)
 
-def load_v11_shells(path_sim, variant, smoothing_arcmin=None, nside=None):
+def load_v11_shells(path_sim, variant, smoothing_arcmin=None, nside=None, shell_ids=None):
 
     def add_baryonified_pixels(shells, diff_shell_inds, diff_shell_vals):
 
@@ -312,8 +312,14 @@ def load_v11_shells(path_sim, variant, smoothing_arcmin=None, nside=None):
     with h5py.File(path_sim, 'r') as f:
 
         # shells = np.array(f['nobaryon_shells']).astype(np.float32)
-        shell_keys = list(f['nobaryon_shells'].keys())
-        shell_keys = np.sort(shell_keys)
+        if shell_ids is None:
+            shell_keys = list(f['nobaryon_shells'].keys())
+            shell_keys = np.sort(shell_keys)
+        else:
+            shell_keys = [f'shell{i:03d}' for i in shell_ids]
+            shell_keys = np.sort(shell_keys)
+            for s in shell_keys:
+                assert s in f['nobaryon_shells'].keys(), f'shell {s} not found in {path_sim}'
 
         for s in shell_keys:
 
