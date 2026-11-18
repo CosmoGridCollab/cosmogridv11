@@ -7,7 +7,7 @@ author: Tomasz Kacprzak
 """
 
 import os, sys, warnings, argparse, h5py, numpy as np, time, logging, itertools, shutil
-from cosmogridv11 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_arrays
+from cosmogridv11 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_arrays, utils_maps
 from cosmogridv11.filenames import *
 import healpy as hp
 
@@ -508,6 +508,15 @@ def create_shell_permutations(conf, args):
         if (not par_fixed[sim_type]) and (conf['redshift_error_method'] in ['desy3', 'fishbacher']):
             samples_z_perturb = get_joint_param_grid(nz_info, len_seq=n_total, sequence='latin_hypercube')
 
+        # load number of realizations for DESY6
+        if conf['redshift_error_method'] == 'desy6':
+            for i, p in enumerate(nz_info):
+                if p['name'] == 'cmb':
+                    continue
+
+                p['num_realizations'] = int(utils_maps.get_num_realizations_desy6(p['file']))
+
+
         # loop over cosmology parameters
         for i in range(n_par):
 
@@ -540,10 +549,10 @@ def create_shell_permutations(conf, args):
                             
                             if par_fixed[sim_type]:
                             
-                                permlist[n][p['name'] + '__sampid'] = -1
+                                permlist[n][p['name'] + '__sampid'] = -1 # placeholder for mean value
                             
                             else:
-                                permlist[n][p['name'] + '__sampid'] = h
+                                permlist[n][p['name'] + '__sampid'] = h % p['num_realizations']
 
 
                         elif 'metacal' in p['name']:
@@ -555,8 +564,8 @@ def create_shell_permutations(conf, args):
 
                             else:
 
-                                permlist[n][p['name'] + '__sampid'] = h
-                                permlist[n][p['name'] + '__shearbiasm'] = h
+                                permlist[n][p['name'] + '__sampid'] = h % p['num_realizations']
+                                permlist[n][p['name'] + '__shearbiasm'] = h % p['num_realizations']
 
                         else: 
                             raise Exception('desy6 samples have to contain metacal or maglim in the sample name')

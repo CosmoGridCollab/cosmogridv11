@@ -29,6 +29,11 @@ def load_nz(filepath, z_max=None):
 
     return nz_info
 
+def get_num_realizations_desy6(file_nz):
+    filename, bin_id = file_nz.split('::')
+    with h5py.File(filename, "r") as f:
+        return len(f[bin_id])
+
 def load_nz_desy6(filepath, bin_id, z_max, realization_id=0):
 
     # Sanity checks on the redshift grid and the n(z) normalization
