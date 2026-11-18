@@ -90,7 +90,15 @@ def cleanup_cosmogrid_files():
     utils_io.robust_remove(dirname_out)
 
 
-def copy_cosmogrid_file(conf, path_sim, filename, check_existing=False, noguard=False, store_key='root', rsync_args='', rsync_R=False):
+def copy_cosmogrid_file(
+        conf, 
+        path_sim, 
+        filename, 
+        check_existing=False, 
+        noguard=False, 
+        store_key='root', 
+        rsync_args='', 
+        rsync_R=False):
 
     from cosmogridv11.copy_guardian import CopyGuardian, is_remote
 
@@ -131,7 +139,7 @@ def copy_cosmogrid_file(conf, path_sim, filename, check_existing=False, noguard=
     for fpath, fname in zip(filepath_in, filenames):
 
 
-        if is_remote(fpath):
+        if is_remote(fpath) or local_scratch:
             
             fpath_local = os.path.join(dirname_out, fname)
 
@@ -159,26 +167,6 @@ def copy_cosmogrid_file(conf, path_sim, filename, check_existing=False, noguard=
 
         copier = CopyGuardian(n_max_connect=10, n_max_attempts_remote=1000, time_between_attempts=10)
         copier(sources=files_remote, destination=dirname_out, force=noguard, rsync_args=rsync_args)
-
-    # if not is_remote(filepath_in):
-        
-    #     filepath_local = filepath_in
-
-    # else:
-        
-    #     # filepath_local = os.path.join(os.getcwd(), os.path.basename(filepath))
-    #     dirname_out = os.path.join(os.getcwd(), path_sim)
-    #     utils_io.robust_makedirs(dirname_out)
-    #     filepath_local = os.path.join(dirname_out, filename)
-
-    #     if check_existing and os.path.isfile(filepath_local):
-            
-    #         LOGGER.warning(f'check_existing=True: returning local existing file {filepath_local}, make sure it is correct')
-
-    #     else:
-            
-    #         copier = CopyGuardian(n_max_connect=20, n_max_attempts_remote=100, time_between_attempts=10)
-    #         copier(sources=filepath_in, destination=filepath_local, force=noguard)
 
     if type(filename) is not list:
         files_local = files_local[0]

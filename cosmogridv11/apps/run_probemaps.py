@@ -5,11 +5,12 @@ Created June 2022
 author: Tomasz Kacprzak
 """
 
-import os, warnings, argparse, h5py, numpy as np, time
+import os, warnings, argparse, h5py, numpy as np, time, shutil
 from cosmogridv11 import utils_io, utils_logging, utils_config, utils_cosmogrid, utils_shells, utils_maps, utils_projection
 from cosmogridv11.filenames import *
 import healpy as hp
 from cosmogridv11.copy_guardian import NoFileException
+from pathlib import Path
 
 warnings.filterwarnings('ignore', category=DeprecationWarning)
 warnings.filterwarnings('ignore', category=RuntimeWarning)
@@ -66,8 +67,8 @@ def setup(args):
                         help='Use more memory')
     parser.add_argument('--long', action='store_true',
                         help='Use more time')
-    parser.add_argument('--precopy', action='store_true',
-                        help='Copy all sims before proceeding')
+    parser.add_argument('--tempdir_scratch', type=str, default=None,
+                        help='Use temporary directory for scratch')
     parser.add_argument('--indices', type=str, default='0>1000', 
                         help='Indices to process, format: 0,1,2,4 or start>stop')
 
@@ -161,27 +162,6 @@ def main(indices, args):
         todo_ids = np.arange(index*args.num_maps_per_index, (index+1)*args.num_maps_per_index)
         files_out_all = []
 
-        if args.precopy:
-
-            LOGGER.info('copying shells')
-            filenames_all = []
-
-            for variant in conf['analysis_variants']:
-
-                # define simulation and local dirs
-                filenames = list(np.unique(todolist_all['path_par'][todo_ids]))
-                filenames = [f.split('bary')[1].lstrip('/') for f in filenames] # bary here is just a keyword for baryonified maps, which contains both dmb and dmo
-                filename_shells, nside = get_filename_shells_for_variant('v11dmo') # it can also be v11dmb, does not matter
-                filenames_all += [f'./{f}/*/{filename_shells}' for f in filenames]
-
-            path_shells_local = utils_maps.copy_cosmogrid_file(conf, 
-                                                               path_sim='', 
-                                                               filename=filenames_all, 
-                                                               check_existing=False, 
-                                                               store_key='bary', # in this version, the "bary" file contains both dmo and dmb
-                                                               rsync_args=' -v ',
-                                                               rsync_R=True)
-
         for id_ in todo_ids:
 
             LOGGER.info(f'================================> projecting maps map_id={id_}')
@@ -205,7 +185,11 @@ def main(indices, args):
 
 
         LOGGER.info(f'cleaning up temp CosmoGrid files')
-        utils_maps.cleanup_cosmogrid_files()
+        if args.tempdir_scratch is not None:
+            utils_io.robust_remove(args.tempdir_scratch)
+            LOGGER.info(f'removed temporary directory {args.tempdir_scratch}')
+
+        # utils_maps.cleanup_cosmogrid_files()
         LOGGER.info(f'done with index {index} time={(time.time()-time_start)/60.:2.2f} min')
 
     return index
@@ -277,12 +261,23 @@ def project_permuted_sims(index, args, conf):
                                                  conf=conf, 
                                                  sim_params=params_current,
                                                  seed_highz=conf['projection']['highz_synfast_seed'] + params_current['id_param']*10000 + index_perm,
-                                                 parslist_all=parslist_all)
+                                                 parslist_all=parslist_all,
+                                                 tempdir_scratch=args.tempdir_scratch)
 
     return files_variants
 
 
-def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_groups, dirpath_out, conf, sim_params, seed_highz, parslist_all):
+def project_single_permuted_sim(
+    probe_kernels, 
+    shell_weights,
+    perms_info,
+    shell_groups,
+    dirpath_out,
+    conf,
+    sim_params,
+    seed_highz,
+    parslist_all,
+    tempdir_scratch=None):
         
     # report
     LOGGER.info(f"=================>  path_par={sim_params['path_par']}")
@@ -293,10 +288,10 @@ def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_
 
         LOGGER.info(f"============> creating permuted lightcone maps for variant={variant}, permutation id_sims={perms_info['id_sim']}")
 
-        # get the right input and load
+        # get the filenames of files we need
         filename_shells, nside = get_filename_shells_for_variant(variant)
-
         paths_shells = []
+        paths_shells_source = []
         for i, id_sim in enumerate(perms_info['id_sim']):
             path_sim = utils_cosmogrid.get_sims_path(sim_params, id_sim=perms_info['id_sim'][i])
             path_sim = os.path.join(path_sim, '', filename_shells)
@@ -304,19 +299,30 @@ def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_
             path_sim = './' + path_sim
             paths_shells.append(path_sim)
 
-        path_shells_local = utils_maps.copy_cosmogrid_file(conf, 
-                                                           path_sim='', 
-                                                           filename=paths_shells, 
-                                                           check_existing=True, 
-                                                           store_key='bary',
-                                                           rsync_R=True)
+            path_sim_source = os.path.join(conf['paths'][f'cosmogrid_bary'], path_sim)
+            paths_shells_source.append(path_sim_source)
+
+        # copy shells if needed
+        if tempdir_scratch is None: # load shells directly from storage
+            path_shells_local = paths_shells_source
+        else: # copy shells first to temporary directory 
+            path_shells_local = [os.path.join(tempdir_scratch, p) for p in paths_shells]
+            for src, dst in zip(paths_shells_source, path_shells_local):
+                Path(dst).parent.mkdir(parents=True, exist_ok=True)
+                if Path(dst).exists():
+                    LOGGER.info(f'file {dst} already exists, skipping...')
+                else:
+                    shutil.copy(src, dst)
+                    LOGGER.info(f'copied {src} -> {dst}')
+            
+
         # loadd all the shells from different simulations according to the shell group permutation index
         shells_perm = {}
         success = True
         for i, id_sim in enumerate(perms_info['id_sim']):
 
             # load shells from the right file and select the shell needed
-            LOGGER.info(f"======> loading sim {i+1}/{len(perms_info)}, id_sim={perms_info['id_sim'][i]}")
+            LOGGER.info(f"======> loading sim {i+1}/{len(perms_info)}, id_sim={perms_info['id_sim'][i]} path={path_shells_local[i]}")
             path_sim = utils_cosmogrid.get_sims_path(sim_params, id_sim=perms_info['id_sim'][i])
 
             try:
