@@ -44,6 +44,8 @@ def load_nz_desy6(filepath, bin_id, z_max, realization_id=0):
 
         elif realization_id >= 0:
             assert realization_id < len(f[bin_id]), f'realization_id {realization_id} out of range {len(f[bin_id])}'
+            n_realizations = len(f[bin_id])
+            realization_id = realization_id % n_realizations
             nz = f[bin_id][realization_id]
             nz = nz / np.sum(nz)
 
@@ -71,6 +73,8 @@ def load_shearm_desy6(file_nz, realization_id):
             if realization_id == -1:
                 shearm = float(np.array(f[bin_key]).mean(axis=0))
             else:
+                n_realizations = len(f[bin_key])
+                realization_id = realization_id % n_realizations
                 shearm = float(f[bin_key][realization_id])
 
             LOGGER.info(f"desy6 shearm {bin_key} {realization_id if realization_id >= 0 else 'mean'} {shearm:2.4e}")
