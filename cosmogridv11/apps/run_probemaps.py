@@ -558,7 +558,7 @@ def get_probe_kernels(nz_info, params, shellinfo, nside_out, perm=None, redshift
     sim_params = dict(n_pix=hp.nside2npix(nside_out), 
                       n_particles=params['n_particles'], 
                       box_size=params['box_size_Mpc_over_h'])
-    LOGGER.debug(f'sim_params={sim_params}')
+    LOGGER.info(f'sim_params={sim_params}')
 
     if test:
         LOGGER.warning('------------> TEST MODE')
