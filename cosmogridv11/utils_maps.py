@@ -43,7 +43,6 @@ def load_nz_desy6(filepath, bin_id, z_max, realization_id=0):
             nz = nz / np.sum(nz)
 
         elif realization_id >= 0:
-            assert realization_id < len(f[bin_id]), f'realization_id {realization_id} out of range {len(f[bin_id])}'
             n_realizations = len(f[bin_id])
             realization_id = realization_id % n_realizations
             nz = f[bin_id][realization_id]
