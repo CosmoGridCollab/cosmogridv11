@@ -494,6 +494,7 @@ def create_shell_permutations(conf, args):
     
         n_perm = n_perms_per_type[sim_type]
         select = np.array([sim_type+'/' in p for p in parslist_all['path_par']])
+
         parslist = parslist_all[select]
         n_par = np.count_nonzero(select)
         n_total = n_perm * n_par
@@ -530,27 +531,38 @@ def create_shell_permutations(conf, args):
                 # DESY6 has a different way of capturing redshift uncertainty: there are multiple n(z) samples for each redshift bin
                 elif conf['redshift_error_method'] == 'desy6':
 
-                    if par_fixed[sim_type]:
+                    for p in nz_info:
 
-                        for p in nz_info:
+                        if p['name'] == 'cmb':
+                            continue
 
-                            if p['name'] == 'cmb':
-                                continue
-
-                            elif 'maglim' in p['name']:
-
+                        elif 'maglim' in p['name']:
+                            
+                            if par_fixed[sim_type]:
+                            
+                                permlist[n][p['name'] + '__sampid'] = -1
+                            
+                            else:
                                 permlist[n][p['name'] + '__sampid'] = h
 
-                            elif 'metacal' in p['name']:
 
-                                permlist[n][p['name'] + '__sampid'] = h # this will be the index of the redshiftnz+shearbiasm in the 
+                        elif 'metacal' in p['name']:
+
+                            if par_fixed[sim_type]:
+
+                                permlist[n][p['name'] + '__sampid'] = -1 # this will be the index of the redshiftnz+shearbiasm in the 
+                                permlist[n][p['name'] + '__shearbiasm'] = -1
+
+                            else:
+
+                                permlist[n][p['name'] + '__sampid'] = h
                                 permlist[n][p['name'] + '__shearbiasm'] = h
 
-                            else: 
+                        else: 
+                            raise Exception('desy6 samples have to contain metacal or maglim in the sample name')
 
-                                raise Exception('desy6 samples have to contain metacal or maglim in the sample name')
-                            
-
+                
+                
                 # fill parameters
                 for c in parslist.dtype.names:
                     permlist[n][c] = parslist[i][c]

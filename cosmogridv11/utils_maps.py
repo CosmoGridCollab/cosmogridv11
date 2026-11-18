@@ -36,9 +36,18 @@ def load_nz_desy6(filepath, bin_id, z_max, realization_id=0):
         z_lo = f["Z_LOW"][:]
         z_mid = f["Z_MID"][:]
         z_hi = f["Z_HIGH"][:]
-        nz = f[bin_id][realization_id]
 
-        LOGGER.info(f"desy6 redshift grid: {z_lo[0]:.2f} < z < {z_hi[-1]:.2f}, {z_mid.size} bins, dz = {np.diff(z_lo)[0]:.3f}, realization_id={realization_id}, mean_z={np.sum(nz * z_mid)/np.sum(nz):8.6f}")
+        if realization_id == -1:
+            
+            nz = np.array(f[bin_id]).mean(axis=0)
+            nz = nz / np.sum(nz)
+
+        elif realization_id > 0:
+            assert realization_id < len(f[bin_id]), f'realization_id {realization_id} out of range {len(f[bin_id])}'
+            nz = f[bin_id][realization_id]
+            nz = nz / np.sum(nz)
+
+        LOGGER.info(f"desy6 redshift grid: {z_lo[0]:.2f} < z < {z_hi[-1]:.2f}, {z_mid.size} bins, dz = {np.diff(z_lo)[0]:.3f}, realization_id={'mean' if realization_id == -1 else realization_id}, mean_z={np.sum(nz * z_mid)/np.sum(nz):8.6f}")
 
         if z_max is not None:
             select = z_mid <= z_max
@@ -58,13 +67,17 @@ def load_shearm_desy6(file_nz, realization_id):
 
         bin_key = bin_id.replace('NZ_', 'M_')
         if bin_key in f:
-            shearm = f[bin_key][realization_id]
-            LOGGER.info(f"desy6 shearm {bin_key} {realization_id} {shearm:2.4e}")
+
+            if realization_id == -1:
+                shearm = float(np.array(f[bin_key]).mean(axis=0))
+            else:
+                shearm = float(f[bin_key][realization_id])
+
+            LOGGER.info(f"desy6 shearm {bin_key} {realization_id if realization_id >= 0 else 'mean'} {shearm:2.4e}")
+
         else:
             shearm = 0
             LOGGER.info(f"desy6 shearm {bin_key} not found, setting to 0")
-        
-
 
     return shearm
 
@@ -288,7 +301,7 @@ def load_shells_uncompressed(path_sim):
         LOGGER.info(f'loaded {os.path.basename(f)} nside={hp.npix2nside(len(m))}')
     return np.array(list_maps)
 
-def load_v11_shells(path_sim, variant, smoothing_arcmin=None):
+def load_v11_shells(path_sim, variant, smoothing_arcmin=None, nside=None):
 
     def add_baryonified_pixels(shells, diff_shell_inds, diff_shell_vals):
 
@@ -317,6 +330,17 @@ def load_v11_shells(path_sim, variant, smoothing_arcmin=None):
             shells.append(shell)
 
     shells = np.array(shells)
+
+    nside_orig = hp.npix2nside(len(shells[0]))
+    if nside is not None:
+        if nside_orig != nside:
+            LOGGER.info(f'switched nside of shells from {nside_orig} to {nside}')
+            shells = hp.ud_grade(shells, nside_out=nside, power=-2)
+        else:
+            LOGGER.info(f'shells already have nside {nside_orig}')
+
+    LOGGER.info(f'shells have shape {shells.shape} and nside {nside if nside is not None else nside_orig}')
+
     out = {'particles': shells}
 
     if smoothing_arcmin is not None:
@@ -328,19 +352,6 @@ def load_v11_shells(path_sim, variant, smoothing_arcmin=None):
         out['particles_smoothed'] = shells_smooth
 
     return out
-
-# def load_v11_haloshells(path_sim, variant):
-
-#     with h5py.File(path_sim, 'r') as f:
-
-#         rho = np.array(f['rho'])
-#         rhosq = np.array(f['rho_sq'])
-
-#     shells = {'halos_rho': rho, 
-#               'halos_rhosq': rhosq}
-
-#     return shells
-
 
 def store_probe_maps(filepath_out, probe_maps, probe_cells=None, survey_mask=False, mode='w'):
 
@@ -361,6 +372,7 @@ def store_probe_maps(filepath_out, probe_maps, probe_cells=None, survey_mask=Fal
                 if probe_maps[probe][sample] is not None:
                     
                     map_ = probe_maps[probe][sample]
+                    nside_orig = hp.npix2nside(len(map_))
                 
                     if survey_mask:
                         map_ = map_[pix_ind]
@@ -490,3 +502,18 @@ def decompress_halos_files(filename_halos):
     import tarfile
     with tarfile.open(filename_halos, "r") as tf:
         tf.extractall()
+
+
+
+# def load_v11_haloshells(path_sim, variant):
+
+#     with h5py.File(path_sim, 'r') as f:
+
+#         rho = np.array(f['rho'])
+#         rhosq = np.array(f['rho_sq'])
+
+#     shells = {'halos_rho': rho, 
+#               'halos_rhosq': rhosq}
+
+#     return shells
+

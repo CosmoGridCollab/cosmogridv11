@@ -256,7 +256,7 @@ def project_permuted_sims(index, args, conf):
                                          params=params_current, 
                                          perm=perm_current, 
                                          shellinfo=shellinfo_current, 
-                                         nside_out=int(conf['baryonification']['nside_out']), 
+                                         nside_out=int(conf['projection']['nside_store']), 
                                          redshift_error_method=conf['redshift_error_method'], 
                                          test=args.test)
 
@@ -320,7 +320,7 @@ def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_
             path_sim = utils_cosmogrid.get_sims_path(sim_params, id_sim=perms_info['id_sim'][i])
 
             try:
-                shells =  utils_maps.load_v11_shells(path_shells_local[i], variant)
+                shells =  utils_maps.load_v11_shells(path_shells_local[i], variant, nside=int(conf['projection']['nside_store']))
 
             except NoFileException as err:
                 LOGGER.error(f'failed to load shells, err={err}')
@@ -372,9 +372,15 @@ def project_single_permuted_sim(probe_kernels, shell_weights, perms_info, shell_
         # output files and store
         filepath_out = get_filepath_projected_maps(dirpath_out, variant)
         LOGGER.info('storing maps')
-        utils_maps.store_probe_maps(filepath_out, probe_maps, probe_cells=probe_cells, survey_mask=conf['projection']['survey_mask'], mode='w')
+        utils_maps.store_probe_maps(filepath_out, 
+                                    probe_maps, 
+                                    probe_cells=probe_cells, 
+                                    survey_mask=conf['projection']['survey_mask'], 
+                                    mode='w')
+        
         LOGGER.info('storing kernels')
         utils_projection.store_probe_kernels(filepath_out, probe_kernels, shell_weights, mode='a')
+        
         LOGGER.info('storing permutation indices')
         utils_shells.store_permutation_index(filepath_out, perms_info, shell_groups, mode='a')
 
@@ -406,7 +412,7 @@ def project_single_sim(index, args, conf):
                                          params=sim_current, 
                                          perm=None, 
                                          shellinfo=shellinfo_current, 
-                                         nside_out=int(conf['baryonification']['nside_out']), 
+                                         nside_out=int(conf['projection']['nside_store']), 
                                          test=args.test)
 
     # prepare output
@@ -423,7 +429,7 @@ def project_single_sim(index, args, conf):
         # get the right input and load
         filename_shells, _ = get_filename_shells_for_variant(variant)
         filepath_shells_local = utils_maps.copy_cosmogrid_file(conf, path_sim=sim_current['path_sim'], filename=filename_shells, check_existing=args.test, store_key='bary')
-        shells =  utils_maps.load_v11_shells(filepath_shells_local, variant)
+        shells =  utils_maps.load_v11_shells(filepath_shells_local, variant, nside=conf['projection'].get('nside_store', None))
 
         # main magic: project probes
         probe_maps = utils_projection.project_all_probes(shells, nz_info, w_shell)
@@ -538,7 +544,7 @@ def get_probe_kernels(nz_info, params, shellinfo, nside_out, perm=None, redshift
     from cosmogridv11 import utils_redshift, utils_projection
 
     n_samples = len(nz_info)
-    LOGGER.info(f'using {n_samples} redshift bins')
+    LOGGER.info(f'using {n_samples} redshift bins with nside_out={nside_out}')
 
     # test mode?
     if test:
@@ -552,6 +558,7 @@ def get_probe_kernels(nz_info, params, shellinfo, nside_out, perm=None, redshift
     sim_params = dict(n_pix=hp.nside2npix(nside_out), 
                       n_particles=params['n_particles'], 
                       box_size=params['box_size_Mpc_over_h'])
+    LOGGER.debug(f'sim_params={sim_params}')
 
     if test:
         LOGGER.warning('------------> TEST MODE')
@@ -585,7 +592,7 @@ def get_probe_kernels(nz_info, params, shellinfo, nside_out, perm=None, redshift
                 elif redshift_error_method in ['desy6']:
 
                     redshift_mod = int(perm[sample['name']+'__sampid'])
-                    LOGGER.info(f'redshift sample id {redshift_mod}')
+                    LOGGER.info(f'redshift sample id {redshift_mod if redshift_mod >= 0 else 'mean'}')
 
                     shearm = utils_maps.load_shearm_desy6(sample['file'], redshift_mod)
                     LOGGER.info(f'shearm {shearm}')
@@ -681,8 +688,8 @@ def missing(indices, args):
                         num_missing_files +=1 
 
                     else:
-
-                        LOGGER.debug(f'{perm_id: 6d} /{len(indices)*args.num_maps_per_index} file OK:      {filepath_out}')
+                        pass
+                        # LOGGER.debug(f'{perm_id: 6d} /{len(indices)*args.num_maps_per_index} file OK:      {filepath_out}')
 
     LOGGER.info(f'found {num_missing_files} missing files out of {num_total_files} total files ({num_missing_files/num_total_files*100:.2f}%)')
 

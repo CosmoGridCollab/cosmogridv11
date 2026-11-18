@@ -90,7 +90,7 @@ def modify_nz(file_nz, z_max, redshift_params, tag, method='fischbacher'):
         elif method == 'desy6':
 
             # here we already selected the sample by sampid, so we don't need to do anything
-            LOGGER.info(f'bin={tag} sampid={redshift_params}')
+            LOGGER.info(f'bin={tag} sampid={redshift_params if redshift_params >= 0 else 'mean'}')
             nz_mod = nz
 
             
