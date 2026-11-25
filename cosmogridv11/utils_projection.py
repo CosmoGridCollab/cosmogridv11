@@ -138,7 +138,7 @@ def project_shells(shells, weight, weight_shell, order='linear', integ_const=0):
 
 def project_all_probes(shells, nz_info, shell_weight):
 
-    available_probes = ['dg2', 'dg', 'kg', 'ia', 'kcmb', 'kd', 'dh', 'dh2']
+    available_probes = ['dg2', 'dg', 'kg', 'ia', 'kcmb', 'kd', 'dh', 'dh2', 'dm']
 
     # output container
     probe_maps = {}
@@ -162,7 +162,7 @@ def project_all_probes(shells, nz_info, shell_weight):
             try:
 
                 # decide shell type
-                if probe in ['dg', 'kg', 'ia', 'kd', 'kcmb']:
+                if probe in ['dg', 'kg', 'ia', 'kd', 'kcmb', 'dm']:
                     shells_key = 'particles'
                 
                 elif probe == 'dg2':
@@ -186,6 +186,8 @@ def project_all_probes(shells, nz_info, shell_weight):
                 # decide kernel functions
                 if probe in ['dh', 'dh2']:
                     weight='w_dg'
+                elif probe == 'dm':
+                    weight = 'w_kg'
                 else:
                     weight = f'w_{probe}'
 
@@ -571,7 +573,8 @@ probe_kernel_funcs = {'kg': get_kernel_kg,
                       'kd': get_kernel_kd,
                       'kcmb': get_kernel_kcmb,
                       'dh': get_kernel_dg,
-                      'dh2': get_kernel_dg2}
+                      'dh2': get_kernel_dg2,
+                      'dm': get_kernel_kg}
 
 
 

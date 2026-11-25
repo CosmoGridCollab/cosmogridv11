@@ -216,7 +216,8 @@ def project_permuted_sims(index, args, conf):
     index_par = perm_current['row_id_parslist']
     params_current = parslist_all[index_par]
     shellinfo_current = shell_info_all[params_current['path_par']]
-    n_sims_avail = np.count_nonzero(simslist_all['path_par']==params_current['path_par'])
+    path_par_bary = np.array([s.replace('raw','bary') for s in simslist_all['path_par']]) # this is a workaround the raw/bary bug in the table
+    n_sims_avail = np.count_nonzero(path_par_bary==params_current['path_par'])
     n_sims_use = min(float(conf['projection']['n_max_sims_use']), n_sims_avail)
     nz_info = conf['redshifts_nz']
 
@@ -244,7 +245,6 @@ def project_permuted_sims(index, args, conf):
                                          test=args.test)
 
     # SHELL GROUPS
-
     perms_info, shell_groups = get_shell_permutations(params=params_current, 
                                                       shellinfo=shellinfo_current,
                                                       n_sims_use=min(float(conf['projection']['n_max_sims_use']), n_sims_avail),
@@ -646,8 +646,7 @@ def get_shell_permutations(params, shellinfo, n_sims_use, n_max_replicas, seed, 
 
     # calculate permutations list
     np.random.seed(seed)
-    LOGGER.info(f'using random seed={seed} for shell permutations')
-
+    LOGGER.info(f'using random seed={seed} for shell permutations n_shell_groups={n_shell_groups} n_sims_use={n_sims_use}')
     perms_info = utils_shells.get_shell_permutation_sequence(n_shell_groups, n_sims_use)
 
     if test:
